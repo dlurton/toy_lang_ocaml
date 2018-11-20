@@ -1,0 +1,8 @@
+#!/bin/bash -e
+
+# you can invoke this script from your favorite editor if it's having diffulties accessing the opam environment
+
+eval `opam config env`
+
+make 
+

@@ -48,9 +48,9 @@ let interp e =
 
 (* A few test cases *)
 let run_tests () =
-  assert (23 = interp "22");
+  assert (22 = interp "22");
   assert (22 = interp "11+11");
   assert (22 = interp "(10+1)+(5+6)");
   assert (22 = interp "let x = 22 in x");
-  assert (22 = interp "let x = 0 in let x = 22 in x")
+  assert (23 = interp "let x = 0 in let x = 22 in x")
 

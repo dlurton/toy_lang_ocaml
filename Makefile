@@ -1,6 +1,6 @@
 # Modified from: https://github.com/gasche/manual-ocamlbuild/blob/master/examples/05-lex-yacc/Makefile
 #
-# TODO: create main.ml which houses a REPL
+# TODO: create repl.ml which houses a REPL
 #
 # Pure OCaml, package from Opam, two directories
 #
@@ -23,18 +23,15 @@ clean:
 	$(OCB) -clean
 
 native: sanity
-#	$(OCB) main.native
+	$(OCB) repl.native
 	$(OCB) test.native
 
 byte: sanity
-#	$(OCB) main.byte
+	$(OCB) repl.byte
 	$(OCB) test.byte
 
-#profile: sanity
-#	$(OCB) -tag profile main.native
-
 debug: sanity
-#	$(OCB) -tag debug main.debug.byte
+	$(OCB) -tag debug repl.debug.byte
 	$(OCB) -tag debug test.debug.byte
 
 # check that menhir is installed, use "opam install menhir"

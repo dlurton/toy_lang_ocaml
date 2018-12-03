@@ -1,5 +1,5 @@
 open Ast
-open Interp;;
+open Core;;
 
 print_string "Running the tests...\n";;
 

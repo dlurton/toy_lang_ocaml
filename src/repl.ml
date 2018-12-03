@@ -1,8 +1,8 @@
 
 open Ast
-open Interp;;
+open Core;;
 
-(* main entry point *)
+(* program entry point *)
 print_endline("OCAML toy language REPL - type \"?exit\" to exit");
 let line_reader = fun () -> try Some (input_line stdin) with End_of_file -> None in
 let rec interpret_line () =
@@ -20,3 +20,4 @@ let rec interpret_line () =
       interpret_line();
 in
   interpret_line()
+

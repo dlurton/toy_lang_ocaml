@@ -1,7 +1,25 @@
-(* The type of the abstract syntax tree (AST). *)
+
+
+
+type scalar_value =
+  | Int32 of int
+
+
 type expr =
   | Var of string
-  | Int of int
-  | Add of expr*expr
-  | Let of string*expr*expr
+  | Literal of scalar_value
+  | Add of expr * expr
+  | Let of string * expr * expr
+
+
+type parse_result =
+    ParseError of string
+  | ParseSuccess of expr
+
+
+type interp_result =
+    InterpError of string
+  | InterpSuccess of scalar_value
+
+
 

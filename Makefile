@@ -23,16 +23,16 @@ clean:
 	$(OCB) -clean
 
 native: sanity
-	$(OCB) repl.native
 	$(OCB) test.native
+	$(OCB) repl.native
 
 byte: sanity
-	$(OCB) repl.byte
 	$(OCB) test.byte
+	$(OCB) repl.byte
 
 debug: sanity
-	$(OCB) -tag debug repl.debug.byte
 	$(OCB) -tag debug test.debug.byte
+	$(OCB) -tag debug repl.debug.byte
 
 # check that menhir is installed, use "opam install menhir"
 sanity:

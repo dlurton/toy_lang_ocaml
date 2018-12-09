@@ -1,56 +1,64 @@
 open Ast
+open Lexer
+open Lexing
+open Errors
 
-(* [subst e1 e2 x] is [e1] with [e2] substituted for [x]. *)
-let rec subst e1 e2 x = match e1 with
-  | Var y      -> if x=y then e2 else e1
-  | Int c      -> Int c
-  | Add(el,er) -> Add(subst el e2 x, subst er e2 x)
-  | Let(y,ebind,ebody) ->
-    if x=y 
-    then Let(y, subst ebind e2 x, ebody)
-    else Let(y, subst ebind e2 x, subst ebody e2 x)
+let add_scalars(left, right) =
+  match (left, right) with
+  | (Int32 lval, Int32 rval) -> Int32(lval + rval)
+  | _ -> raise (InterpError("Incompatible data types"))
 
-(* A single step of evaluation. *)
-let rec step = function
-  | Int n               -> failwith "Does not step"
-  | Var _               -> failwith "Unbound variable"
-  | Add(Int n1, Int n2) -> Int (n1+n2)
-  | Add(Int n1, e2)     -> Add(Int n1, e2)
-  | Add(e1,e2)          -> Add(step e1, e2)
-  | Let(x,Int n,e2)     -> subst e2 (Int n) x
-  | Let(x,e1,e2)        -> Let(x,step e1, e2)
+let eval e =
+  let rec step = function
+    | Var v               -> raise (InterpError ("Unbound variable '" ^ v ^ "'"))
+    | Literal n           -> n
+    | Add(l, r)             -> add_scalars(step(l), step(r))
+    | _                   -> raise (InterpError ("Unsupported expression type"))
+  in
+  try InterpSuccess(step(e))
+  with InterpError msg ->
+    InterpError(msg)
 
-(* The reflexive, transitive closure of [step]. *)
-let rec multistep = function
-  | Int n -> Int n
-  | e     -> multistep (step e)
 
-(***********************************************************************)
-(* Everything above this is essentially the same as we saw in lecture. *)
-(***********************************************************************)
+(* Parse a string into an ast
+   Note: error handling is described here: https://v1.realworldocaml.org/v1/en/html/parsing-with-ocamllex-and-menhir.html
+*)
 
-(* Parse a string into an ast *)
 let parse s =
-  let lexbuf = Lexing.from_string s in
-  let ast = Parser.prog Lexer.read lexbuf in
-  ast
+  let lexbuf = Lexing.from_string(s) in
+  try
+    let ast = Parser.prog Lexer.read lexbuf in
+    ParseSuccess(ast)
+  with LexicalError msg ->
+    ParseError("Lexical error: " ^ msg)
+     | Parser.Error ->
+       ParseError("Syntax error")
 
-(* Extract a value from an ast node.
-   Raises Failure if the argument is a node containing a value. *)
-let extract_value = function
-  | Int i -> i
-  | _ -> failwith "Not a value"
+let scalar_to_int = function
+  | Int32 i -> i
+(*| _ -> failwith "Not an integer"*)
 
-(* Interpret an expression *)
-let interp e =
-  e |> parse |> multistep |> extract_value
+let scalar_to_string = function
+  | Int32 i -> string_of_int(i)
+(*| _ -> failwith "Not an integer"*)
+
+(* TODO: fold in to pattern matched eval function *)
+let execute (s: string) : int =
+  let presult = parse(s) in
+  match presult with
+  | ParseError pmsg -> failwith("Parse error: " ^ pmsg)
+  | ParseSuccess e ->
+    let iresult = eval(e) in
+    match iresult with
+    | InterpError imsg -> failwith("Interp error: " ^ imsg)
+    | InterpSuccess r -> scalar_to_int(r)
 
 
 (* A few test cases *)
-let run_tests () =
-  assert (22 = interp "22");
-  assert (22 = interp "11+11");
-  assert (22 = interp "(10+1)+(5+6)");
-  assert (22 = interp "let x = 22 in x");
-  assert (23 = interp "let x = 0 in let x = 22 in x")
+let run_tests ()  =
+  assert (22 = execute "22");
+  assert (22 = execute "11+11");
+  assert (22 = execute "(10+1)+(5+6)");
+  assert (22 = execute "let x = 22 in x");
+  assert (23 = execute "let x = 0 in let x = 22 in x")
 

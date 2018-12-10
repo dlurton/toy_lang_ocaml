@@ -2,7 +2,6 @@ open Types
 open Lexer
 open Lexing
 
-
 (* An environment that has no variable and no parent. *)
 let empty_env = fun _ -> None
 
@@ -10,7 +9,6 @@ let empty_env = fun _ -> None
 let extend_env env name value = fun lookup ->
   match lookup with
   | name -> Some(value)
-
 
 (* Evaluates the parsed expression with the specified top-level environment. *)
 let eval e top_env : interp_result =
@@ -40,7 +38,8 @@ let eval e top_env : interp_result =
   in
   try InterpSuccess(innerEval e top_env)
   with InterpExn msg ->
-    InterpError(msg)
+    let sloc = make_source_location "TODO" 1 1 in 
+    InterpError(sloc, msg)
 
 (* Evaluates the parsed expression with an empty environment. *)
 let eval_with_empty_env e =
@@ -55,10 +54,10 @@ let parse s =
   try
     let ast = Parser.prog Lexer.read lexbuf in
     ParseSuccess(ast)
-  with LexicalExn msg ->
-    ParseError("Lexical error: " ^ msg)
-     | Parser.Error ->
-       ParseError("Syntax error")
+  with LexicalExn(src_loc, msg) ->
+    ParseError(src_loc, "Lexical error: " ^ msg)
+    | Parser.Error ->
+       ParseError(make_source_location "TODO" 1 1, "Syntax error")
 
 
 

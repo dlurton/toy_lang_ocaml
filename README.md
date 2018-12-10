@@ -25,8 +25,7 @@ I also recommend:
 
 ## TODO
 
-- Use `ounit2` instead of whatever is going on at the end of `interp.ml`
-- Add `main.ml` (commented out references already exist in `Makefile`) to add a REPL.
+- Use `ounit2` instead of whatever is going on in `test.ml`
 - Add the language features of your choice.
 
 Tested with `ocamlc` 4.07.0.

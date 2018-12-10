@@ -4,6 +4,7 @@
 
 {
 open Parser
+open Types
 }
 
 (* The second section of the lexer definition defines *identifiers*
@@ -34,7 +35,7 @@ let id = letter+
    specified by the [action].  We won't go into details on how the actions
    work.  *)
 
-rule read = 
+rule read =
   parse
   | white { read lexbuf }
   | "+"   { PLUS }
@@ -46,5 +47,6 @@ rule read =
   | id    { ID (Lexing.lexeme lexbuf) }
   | int   { INT (int_of_string (Lexing.lexeme lexbuf)) }
   | eof   { EOF }
-	
+  | _ { raise (LexicalExn ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }
+
 (* And that's the end of the lexer definition. *)

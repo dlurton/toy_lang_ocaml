@@ -6,7 +6,9 @@
    [Int i] instead of [Ast.Int i]. *)
 
 %{
-open Ast
+open Types
+
+exception SyntaxError of string
 %}
 
 (* The next section of the grammar definition, called the *declarations*,
@@ -49,7 +51,7 @@ open Ast
    The declaration also says that parsing a [prog] will return an OCaml
    value of type [Ast.expr]. *)
 
-%start <Ast.expr> prog
+%start <Types.expr> prog
 
 (* The following %% ends the declarations section of the grammar definition. *)
 
@@ -110,11 +112,11 @@ prog:
      expression is bound to [e] and returned. *)
           
 expr:
-	| i = INT { Int i }
-	| x = ID { Var x }
+	| i = INT { Literal(Int32(i)) }
+	| x = ID { Var(x) }
 	| e1 = expr; PLUS; e2 = expr { Add(e1,e2) }
 	| LET; x = ID; EQUALS; e1 = expr; IN; e2 = expr { Let(x,e1,e2) }
-	| LPAREN; e = expr; RPAREN {e} 
-	;
-	
+	| LPAREN; e = expr; RPAREN {e}
+
+
 (* And that's the end of the grammar definition. *)

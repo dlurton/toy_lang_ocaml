@@ -1,22 +1,42 @@
-open Ast
+open Types
 open Lexer
 open Lexing
-open Errors
 
-let add_scalars(left, right) =
+let add_scalars left right  =
   match (left, right) with
   | (Int32 lval, Int32 rval) -> Int32(lval + rval)
-  | _ -> raise (InterpError("Incompatible data types"))
+  | _ -> raise (InterpExn("Incompatible data types"))
 
-let eval e =
-  let rec step = function
-    | Var v               -> raise (InterpError ("Unbound variable '" ^ v ^ "'"))
-    | Literal n           -> n
-    | Add(l, r)             -> add_scalars(step(l), step(r))
-    | _                   -> raise (InterpError ("Unsupported expression type"))
+let empty_env = fun _ -> None
+
+let extend_env env name value = fun lookup ->
+  match lookup with
+  | name -> Some(value)
+  | _ -> env lookup
+
+let eval e top_env : interp_result =
+  let rec innerEval (e: expr) (env: string -> scalar_value option) : scalar_value =
+    match e with
+    | Var v ->
+      begin
+        let value = env(v) in
+        match value with
+        (* TODO: don't throw an exception here? *)
+        | None -> raise (InterpExn("Unbound variable '" ^ v ^ "'"))
+        | Some v -> v
+      end
+    | Literal n -> n
+    | Add(l, r) ->
+      let lvalue = innerEval l env in
+      let rvalue = innerEval r env in
+      add_scalars lvalue rvalue
+    | Let(name, valueExp, bodyExp) ->
+      let the_value = innerEval valueExp env in
+      let nested_env = extend_env env name the_value in
+      innerEval bodyExp nested_env
   in
-  try InterpSuccess(step(e))
-  with InterpError msg ->
+  try InterpSuccess(innerEval e top_env)
+  with InterpExn msg ->
     InterpError(msg)
 
 
@@ -29,7 +49,7 @@ let parse s =
   try
     let ast = Parser.prog Lexer.read lexbuf in
     ParseSuccess(ast)
-  with LexicalError msg ->
+  with LexicalExn msg ->
     ParseError("Lexical error: " ^ msg)
      | Parser.Error ->
        ParseError("Syntax error")
@@ -48,7 +68,7 @@ let execute (s: string) : int =
   match presult with
   | ParseError pmsg -> failwith("Parse error: " ^ pmsg)
   | ParseSuccess e ->
-    let iresult = eval(e) in
+    let iresult = eval e empty_env in
     match iresult with
     | InterpError imsg -> failwith("Interp error: " ^ imsg)
     | InterpSuccess r -> scalar_to_int(r)

@@ -1,5 +1,5 @@
 
-open Ast
+open Types
 open Core;;
 
 (* program entry point *)
@@ -22,7 +22,7 @@ let rec interpret_line () =
         | ParseError pmsg -> print_endline("Parse error: " ^ pmsg)
         | ParseSuccess expr ->
           (* attempt to interpret the AST *)
-          let iresult = eval(expr) in
+          let iresult = eval expr empty_env in
           match iresult with
           | InterpError imsg -> print_endline("Interp error: " ^ imsg)
           | InterpSuccess value ->

@@ -3,9 +3,8 @@
    that will simply be copied literally into the generated lexer.ml. *)
 
 {
-
 open Parser
-open Errors
+open Types
 }
 
 (* The second section of the lexer definition defines *identifiers*
@@ -48,6 +47,6 @@ rule read =
   | id    { ID (Lexing.lexeme lexbuf) }
   | int   { INT (int_of_string (Lexing.lexeme lexbuf)) }
   | eof   { EOF }
-  | _ { raise (LexicalError ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }
+  | _ { raise (LexicalExn ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }
 
 (* And that's the end of the lexer definition. *)

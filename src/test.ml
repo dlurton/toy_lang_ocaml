@@ -1,4 +1,4 @@
-open Ast
+open Types
 open Core;;
 
 print_string "Running the tests...\n";;

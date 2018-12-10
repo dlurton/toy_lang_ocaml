@@ -22,4 +22,7 @@ type interp_result =
   | InterpSuccess of scalar_value
 
 
+exception LexicalExn of string
+exception InterpExn of string
+
 

@@ -6,7 +6,7 @@
    [Int i] instead of [Ast.Int i]. *)
 
 %{
-open Ast
+open Types
 
 exception SyntaxError of string
 %}
@@ -51,7 +51,7 @@ exception SyntaxError of string
    The declaration also says that parsing a [prog] will return an OCaml
    value of type [Ast.expr]. *)
 
-%start <Ast.expr> prog
+%start <Types.expr> prog
 
 (* The following %% ends the declarations section of the grammar definition. *)
 

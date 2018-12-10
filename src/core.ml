@@ -2,20 +2,23 @@ open Types
 open Lexer
 open Lexing
 
-let add_scalars left right  =
-  match (left, right) with
-  | (Int32 lval, Int32 rval) -> Int32(lval + rval)
-  | _ -> raise (InterpExn("Incompatible data types"))
 
+(* An environment that has no variable and no parent. *)
 let empty_env = fun _ -> None
 
+(* Nests the specified env in another env that has a variable. *)
 let extend_env env name value = fun lookup ->
   match lookup with
   | name -> Some(value)
-  | _ -> env lookup
 
+
+(* Evaluates the parsed expression with the specified top-level environment. *)
 let eval e top_env : interp_result =
-  let rec innerEval (e: expr) (env: string -> scalar_value option) : scalar_value =
+  let add_scalars left right  =
+    match (left, right) with
+    | (Int32 lval, Int32 rval) -> Int32(lval + rval)
+  in
+  let rec innerEval (e: expr) (env: string -> value option) : value =
     match e with
     | Var v ->
       begin
@@ -39,11 +42,14 @@ let eval e top_env : interp_result =
   with InterpExn msg ->
     InterpError(msg)
 
+(* Evaluates the parsed expression with an empty environment. *)
+let eval_with_empty_env e =
+  eval e empty_env
 
-(* Parse a string into an ast
+(*
+   Uses the Menhir generated parser to turn a string into an AST.
    Note: error handling is described here: https://v1.realworldocaml.org/v1/en/html/parsing-with-ocamllex-and-menhir.html
 *)
-
 let parse s =
   let lexbuf = Lexing.from_string(s) in
   try
@@ -54,31 +60,5 @@ let parse s =
      | Parser.Error ->
        ParseError("Syntax error")
 
-let scalar_to_int = function
-  | Int32 i -> i
-(*| _ -> failwith "Not an integer"*)
 
-let scalar_to_string = function
-  | Int32 i -> string_of_int(i)
-(*| _ -> failwith "Not an integer"*)
-
-(* TODO: fold in to pattern matched eval function *)
-let execute (s: string) : int =
-  let presult = parse(s) in
-  match presult with
-  | ParseError pmsg -> failwith("Parse error: " ^ pmsg)
-  | ParseSuccess e ->
-    let iresult = eval e empty_env in
-    match iresult with
-    | InterpError imsg -> failwith("Interp error: " ^ imsg)
-    | InterpSuccess r -> scalar_to_int(r)
-
-
-(* A few test cases *)
-let run_tests ()  =
-  assert (22 = execute "22");
-  assert (22 = execute "11+11");
-  assert (22 = execute "(10+1)+(5+6)");
-  assert (22 = execute "let x = 22 in x");
-  assert (23 = execute "let x = 0 in let x = 22 in x")
 

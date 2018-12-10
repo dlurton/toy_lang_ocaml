@@ -20,13 +20,13 @@ let rec interpret_line () =
         let presult = parse(line_text) in
         match presult with
         | ParseError pmsg -> print_endline("Parse error: " ^ pmsg)
-        | ParseSuccess expr ->
+        | ParseSuccess e ->
           (* attempt to interpret the AST *)
-          let iresult = eval expr empty_env in
+          let iresult = eval_with_empty_env e in
           match iresult with
           | InterpError imsg -> print_endline("Interp error: " ^ imsg)
           | InterpSuccess value ->
-            print_endline(scalar_to_string(value))
+            print_endline(value_to_string(value))
   end;
   interpret_line()
 in

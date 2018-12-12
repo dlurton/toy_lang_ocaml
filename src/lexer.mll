@@ -15,7 +15,6 @@ let raise_lexical_error lexbuf msg =
   let p = Lexing.lexeme_start_p lexbuf in
   let src_loc = make_source_location p.Lexing.pos_fname p.Lexing.pos_lnum p.Lexing.pos_cnum in
   raise (LexicalExn (src_loc, msg))
-  (*raise (LexicalExn src_loc msg) *)
 ;;
 }
 

@@ -25,7 +25,10 @@ let make_source_location file line_num char_offset = {
 }
 
 (* The AST. *)
-type expr =
+type expr = {
+    exp : expr_node;
+    loc : source_location;
+} and expr_node =
   | Var of string
   | Literal of value
   | Add of expr * expr

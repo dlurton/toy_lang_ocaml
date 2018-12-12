@@ -6,6 +6,9 @@
 open Parser
 open Types
 
+let source_location_of_position p =
+
+
 (*
 The ocamllex bootstrapped lexer seems like a good thing to use an
 example for error handling: https://github.com/let-def/ocamllex/blob/master/lexer.mll

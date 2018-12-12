@@ -9,6 +9,8 @@
 open Types
 
 exception SyntaxError of string
+
+position
 %}
 
 (* The next section of the grammar definition, called the *declarations*,
@@ -111,6 +113,11 @@ prog:
      [LPAREN] token followed by an [expr] followed by an [RPAREN].  The
      expression is bound to [e] and returned. *)
           
+
+    (*
+     we want $startpos and $endpos
+
+     *)
 expr:
 	| i = INT { Literal(Int32(i)) }
 	| x = ID { Var(x) }

@@ -1,7 +1,5 @@
 # Modified from: https://github.com/gasche/manual-ocamlbuild/blob/master/examples/05-lex-yacc/Makefile
 #
-# TODO: create repl.ml which houses a REPL
-#
 # Pure OCaml, package from Opam, two directories
 #
 # - The -I flag introduces sub-directories

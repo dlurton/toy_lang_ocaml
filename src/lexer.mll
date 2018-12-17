@@ -5,6 +5,20 @@
 {
 open Parser
 open Types
+open Util
+
+(*
+The ocamllex bootstrapped lexer seems like a good thing to use an
+example for error handling: https://github.com/let-def/ocamllex/blob/master/lexer.mll
+*)
+
+let raise_lexical_error lexbuf msg =
+  let p = Lexing.lexeme_start_p lexbuf in
+  (*let src_loc = make_source_location p.Lexing.pos_fname p.Lexing.pos_lnum p.Lexing.pos_cnum in*)
+  let src_loc = source_location_of_position p in
+  raise (LexicalExn(src_loc, msg))
+;;
+
 }
 
 (* The second section of the lexer definition defines *identifiers*
@@ -47,6 +61,9 @@ rule read =
   | id    { ID (Lexing.lexeme lexbuf) }
   | int   { INT (int_of_string (Lexing.lexeme lexbuf)) }
   | eof   { EOF }
-  | _ { raise (LexicalExn ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }
+  | _ {
+      let illegal_c = Lexing.lexeme lexbuf in
+      raise_lexical_error lexbuf ("Illegal character: " ^ illegal_c)
+    }
 
 (* And that's the end of the lexer definition. *)

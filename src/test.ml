@@ -5,11 +5,11 @@ open Core;;
 let test_int (s: string) : int =
   let presult = parse(s) in
   match presult with
-  | ParseError pmsg -> failwith("Parse error: " ^ pmsg)
+  | ParseError(_, pmsg) -> failwith("Parse error: " ^ pmsg)
   | ParseSuccess e ->
     let iresult = eval_with_empty_env e in
     match iresult with
-    | InterpError imsg -> failwith("Interp error: " ^ imsg)
+    | InterpError (_, imsg) -> failwith("Interp error: " ^ imsg)
     | InterpSuccess r -> value_to_int(r)
 
 (* A few test cases *)

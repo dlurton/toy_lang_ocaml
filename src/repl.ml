@@ -2,14 +2,17 @@
 open Types
 open Core
 open Printf
+open Pretty
+
+
 ;;
 
 (* program entry point *)
 print_endline("OCAML toy language REPL - type \"?exit\" to exit");
 
 let show_error sloc msg =
-  if (String.length sloc.file) != 0 then Printf.printf "%s: " sloc.file;
-  Printf.printf "(%d, %d): %s\n" sloc.line_num sloc.char_offset msg;
+  if (String.length sloc.file) != 0 then printf "%s: " sloc.file;
+  printf "(%d, %d): %s\n" sloc.line_num sloc.char_offset msg;
   flush(stdout)
 in
 
@@ -29,12 +32,14 @@ let rec interpret_line () =
         match presult with
         | ParseError(sloc, pmsg) -> show_error sloc pmsg
         | ParseSuccess e ->
+          printf "AST: %s\n" (pretty_string_of_expr e);
           (* attempt to interpret the AST *)
           let iresult = eval_with_empty_env e in
           match iresult with
           | InterpError(sloc, imsg) -> show_error sloc imsg
           | InterpSuccess value ->
-            print_endline(value_to_string(value))
+            printf "Value: %s\n" (pretty_string_of_value value);
+            ()
   end;
   interpret_line()
 in

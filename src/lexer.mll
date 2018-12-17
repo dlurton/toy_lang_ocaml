@@ -51,13 +51,14 @@ let id = letter+
 
 rule read =
   parse
-  | white { read lexbuf }
-  | "+"   { PLUS }
-  | "("   { LPAREN }
-  | ")"   { RPAREN }
-  | "let" { LET }
-  | "="   { EQUALS }
-  | "in"  { IN }
+  | white  { read lexbuf }
+  | "+"    { PLUS }
+  | "("    { LPAREN }
+  | ")"    { RPAREN }
+  | "let"  { LET }
+  | "="    { EQUALS }
+  | "in"   { IN }
+  | "proc" { PROC }
   | id    { ID (Lexing.lexeme lexbuf) }
   | int   { INT (int_of_string (Lexing.lexeme lexbuf)) }
   | eof   { EOF }

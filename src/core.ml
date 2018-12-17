@@ -21,9 +21,11 @@ let extend_env env name value = fun lookup ->
 let eval e top_env : interp_result =
   let add_scalars left right  =
     match (left, right) with
-    | (Int32 lval, Int32 rval) -> Int32(lval + rval)
+    | (Int32Value lval, Int32Value rval) -> Int32Value(lval + rval)
+    | (ProcValue _, _) -> failwith("TODO")
+    | ( _, ProcValue _) -> failwith("TODO")
   in
-  let rec innerEval (e: expr) (env: string -> value option) : value =
+  let rec inner_eval (e: expr) (env: string -> value option) : value =
     match e.exp with
     | Var v ->
       begin
@@ -34,16 +36,25 @@ let eval e top_env : interp_result =
         | Some v -> v
       end
     | Literal n -> n
+    | Proc(name, body_exp) -> ProcValue(name, body_exp)
     | Add(l, r) ->
-      let lvalue = innerEval l env in
-      let rvalue = innerEval r env in
+      let lvalue = inner_eval l env in
+      let rvalue = inner_eval r env in
       add_scalars lvalue rvalue
-    | Let(name, valueExp, bodyExp) ->
-      let the_value = innerEval valueExp env in
+    | Let(name, value_exp, body_exp) ->
+      let the_value = inner_eval value_exp env in
       let nested_env = extend_env env name the_value in
-      innerEval bodyExp nested_env
+      inner_eval body_exp nested_env
+    | Call(proc_exp, arg_exp) ->
+      let proc_val = inner_eval proc_exp env in
+      match proc_val with
+      | ProcValue(arg_name, body_exp) ->
+        let arg_value = inner_eval arg_exp env in
+        let call_env = extend_env env arg_name arg_value in
+        inner_eval body_exp call_env
+      | _ -> failwith "TODO: error handling when proc expr is not a proc"
   in
-  try InterpSuccess(innerEval e top_env)
+  try InterpSuccess(inner_eval e top_env)
   with InterpExn (loc, msg) ->
     InterpError(loc, msg)
 
@@ -64,6 +75,4 @@ let parse s =
     ParseError(src_loc, "Lexical error: " ^ msg)
     | Parser.Error ->
        ParseError(make_source_location "TODO" 1 1, "Syntax error")
-
-
 

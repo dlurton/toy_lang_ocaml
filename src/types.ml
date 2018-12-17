@@ -2,16 +2,6 @@
    This file contain the core data type definitions.
 *)
 
-(* The evaluation-time "ground" types. *)
-type value =
-  | Int32 of int
-
-let value_to_int = function
-  | Int32 i -> i
-
-let value_to_string = function
-  | Int32 i -> string_of_int(i)
-
 type source_location = {
   file: string;
   line_num: int;
@@ -30,15 +20,26 @@ let dummy_source_location = {
   char_offset = -1;
 }
 
-(* The AST. *)
-type expr = {
+(* The evaluation-time "ground" types. *)
+type value =
+  | Int32Value of int
+  | ProcValue of string * expr
+  (* The AST. *)
+and expr = {
     exp : expr_node;
     loc : source_location;
-} and expr_node =
+  }
+and expr_node =
   | Var of string
   | Literal of value
   | Add of expr * expr
   | Let of string * expr * expr
+  | Proc of string * expr
+  | Call of expr * expr
+
+let value_to_int = function
+  | Int32Value i -> i
+  | ProcValue _ -> failwith "TODO"
 
 (* The result of an attempt to parse a snippet of code. *)
 type parse_result =

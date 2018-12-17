@@ -18,8 +18,19 @@ let run_tests ()  =
   assert (22 = test_int "22");
   assert (22 = test_int "11+11");
   assert (22 = test_int "(10+1)+(5+6)");
+
+  (* let *)
   assert (22 = test_int "let x = 22 in x");
   assert (22 = test_int "let x = 0 in let x = 22 in x");
+
+  (* procedures *)
+  assert (22 = test_int "(proc(f) f + 1)(21)");
+  assert (22 = test_int "let p = proc(f) f + 1 in p(21)");
+  assert (22 = test_int "(proc(f) f(21))(proc(x) x + 1)");
+
+  (* nested procedures *)
+  assert (22 = test_int "(proc(n) proc(m) x + y)(10)(12)");
+
   print_string "Done!\n";;
 
 (* program entry point. *)

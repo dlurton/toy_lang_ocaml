@@ -28,6 +28,7 @@ exception SyntaxError of string
 %token LPAREN
 %token RPAREN
 %token LET
+%token PROC
 %token EQUALS
 %token IN
 %token EOF
@@ -118,14 +119,18 @@ prog:
      *)
 expr:
 	| i = INT
-    { make_node (Literal(Int32(i))) $startpos }
+    { make_node (Literal(Int32Value(i))) $startpos }
 	| x = ID
     { make_node (Var(x)) $startpos }
 	| e1 = expr; PLUS; e2 = expr
     { make_node (Add(e1, e2)) $startpos }
 	| LET; x = ID; EQUALS; e1 = expr; IN; e2 = expr
     { make_node (Let(x, e1, e2)) $startpos }
-	| LPAREN; e = expr; RPAREN
+  | PROC; LPAREN; var_name = ID; RPAREN; body = expr;
+    { make_node (Literal(ProcValue(var_name, body))) $startpos }
+  | proc_expr = expr; LPAREN; arg = expr; RPAREN;
+    { make_node (Call(proc_expr, arg)) $startpos }
+  | LPAREN; e = expr; RPAREN
     { e }
 
 

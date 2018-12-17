@@ -46,7 +46,7 @@ exception SyntaxError of string
 %nonassoc IN
 %left PLUS
 
-(* After declaring associativity and precedenc e, we need to declare what
+(* After declaring associativity and precedence, we need to declare what
    the starting point is for parsing the language.  The following
    declaration says to start with a rule (defined below) named [prog].
    The declaration also says that parsing a [prog] will return an OCaml

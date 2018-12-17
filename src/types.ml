@@ -24,6 +24,12 @@ let make_source_location file line_num char_offset = {
   char_offset = char_offset
 }
 
+let dummy_source_location = {
+  file = "TODO";
+  line_num = -1;
+  char_offset = -1;
+}
+
 (* The AST. *)
 type expr = {
     exp : expr_node;
@@ -50,5 +56,5 @@ type interp_result =
 exception LexicalExn of source_location * string
 
 (* Exception thrown by the interpreter when an error is encountered. *)
-exception InterpExn of string
+exception InterpExn of source_location * string
 

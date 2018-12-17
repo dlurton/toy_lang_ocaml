@@ -4,7 +4,6 @@ open Core
 open Printf
 ;;
 
-
 (* program entry point *)
 print_endline("OCAML toy language REPL - type \"?exit\" to exit");
 

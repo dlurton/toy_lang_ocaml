@@ -7,10 +7,9 @@
 
 %{
 open Types
-
+open Util
 exception SyntaxError of string
 
-position
 %}
 
 (* The next section of the grammar definition, called the *declarations*,
@@ -40,14 +39,14 @@ position
    
    Because PLUS is left associative, "1+2+3" will parse as "(1+2)+3"
    and not as "1+(2+3)".
-   
+    
    Because PLUS has higher precedence than IN, "let x=1 in x+2" will
    parse as "let x=1 in (x+2)" and not as "(let x=1 in x)+2". *)
 
 %nonassoc IN
 %left PLUS
 
-(* After declaring associativity and precedence, we need to declare what
+(* After declaring associativity and precedenc e, we need to declare what
    the starting point is for parsing the language.  The following
    declaration says to start with a rule (defined below) named [prog].
    The declaration also says that parsing a [prog] will return an OCaml
@@ -116,14 +115,17 @@ prog:
 
     (*
      we want $startpos and $endpos
-
      *)
 expr:
-	| i = INT { Literal(Int32(i)) }
-	| x = ID { Var(x) }
-	| e1 = expr; PLUS; e2 = expr { Add(e1,e2) }
-	| LET; x = ID; EQUALS; e1 = expr; IN; e2 = expr { Let(x,e1,e2) }
-	| LPAREN; e = expr; RPAREN {e}
+	| i = INT
+    { make_node (Literal(Int32(i))) $startpos }
+	| x = ID
+    { make_node (Var(x)) $startpos }
+	| e1 = expr; PLUS; e2 = expr
+    { make_node (Add(e1, e2)) $startpos }
+	| LET; x = ID; EQUALS; e1 = expr; IN; e2 = expr
+    { make_node (Let(x, e1, e2)) $startpos }
+	| LPAREN; e = expr; RPAREN
+    { e }
 
 
-(* And that's the end of the grammar definition. *)

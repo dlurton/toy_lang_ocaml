@@ -5,8 +5,9 @@
 {
 open Parser
 open Types
+open Util
 
-let source_location_of_position p =
+(* let source_location_of_position p = *)
 
 
 (*
@@ -16,9 +17,11 @@ example for error handling: https://github.com/let-def/ocamllex/blob/master/lexe
 
 let raise_lexical_error lexbuf msg =
   let p = Lexing.lexeme_start_p lexbuf in
-  let src_loc = make_source_location p.Lexing.pos_fname p.Lexing.pos_lnum p.Lexing.pos_cnum in
-  raise (LexicalExn (src_loc, msg))
+  (*let src_loc = make_source_location p.Lexing.pos_fname p.Lexing.pos_lnum p.Lexing.pos_cnum in*)
+  let src_loc = source_location_of_position p in
+  raise (LexicalExn(src_loc, msg))
 ;;
+
 }
 
 (* The second section of the lexer definition defines *identifiers*

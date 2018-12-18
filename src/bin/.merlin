@@ -1,0 +1,7 @@
+EXCLUDE_QUERY_DIR
+B ../../_build/default/src/bin/.repl.eobjs
+B ../../_build/default/src/bin/.test.eobjs
+B ../../_build/default/src/toy/.toy.objs
+S .
+S ../toy
+FLG -w @a-4-29-40-41-42-44-45-48-58-59-60-40 -strict-sequence -strict-formats -short-paths -keep-locs -w @a-4-29-40-41-42-44-45-48-58-59-60-40 -strict-sequence -strict-formats -short-paths -keep-locs

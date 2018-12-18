@@ -1,0 +1,6 @@
+
+(library
+    (name toy))
+(ocamllex lexer)
+(menhir 
+    (modules parser))

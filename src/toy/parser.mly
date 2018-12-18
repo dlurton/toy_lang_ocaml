@@ -8,7 +8,7 @@
 %{
 open Types
 open Util
-exception SyntaxError of string
+(* exception SyntaxError of string*)
 
 %}
 

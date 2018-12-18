@@ -1,0 +1,10 @@
+(executable 
+    (name repl)
+    (modules repl)
+    (libraries toy))
+(executable 
+    (name test)
+    (modules test)
+    (libraries toy))
+
+

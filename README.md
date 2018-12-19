@@ -11,13 +11,14 @@ The following has been added:
 - A `buildme` script which can be used to run `make` if processes spawned from your editor can't read the `opam` environment variables.
 - The `main.ml` file was renamed to `interp.ml` because it does not appear to have been intended as the starting point of the interpreter.
 
-To build, run `make` or `buildme`.  To test, build and then run `test.byte` or `test.native`.  To include debug info, run `make debug`.
+To build, run `dune build` from the project's root directory.  To test, build and then run `dune runtest`.
 
 Prerequisites: 
 
 - `opam init`
 - `opam setup -a`
 - `opam install menhir`
+- 'opam install dune'
 
 I also recommend:
 

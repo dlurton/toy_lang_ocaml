@@ -1,7 +1,7 @@
 
-open Types
-open Core
-open Printf
+open Toy_lang.Types
+open Toy_lang.Core
+
 ;;
 
 (* program entry point *)

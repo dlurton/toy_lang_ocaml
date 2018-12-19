@@ -1,10 +1,7 @@
 open Types
 
-(*
-   Menhir reference manual: http://gallium.inria.fr/~fpottier/menhir/manual.pdf
-   Lexing module documentation: https://caml.inria.fr/pub/docs/manual-ocaml/libref/Lexing.html
-*)
 
+    
 
 (* An environment that has no variable and no parent. *)
 let empty_env = fun _ -> None

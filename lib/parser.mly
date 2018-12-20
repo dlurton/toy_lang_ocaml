@@ -52,7 +52,7 @@ open Util
    The declaration also says that parsing a [prog] will return an OCaml
    value of type [Ast.expr]. *)
 
-%start <Types.expr> prog
+%start <Types.expr_t> prog
 
 (* The following %% ends the declarations section of the grammar definition. *)
 
@@ -123,8 +123,8 @@ expr:
     { make_node (Var(x)) $startpos }
 	| e1 = expr; PLUS; e2 = expr
     { make_node (Add(e1, e2)) $startpos }
-	| LET; x = ID; EQUALS; e1 = expr; IN; e2 = expr
-    { make_node (Let(x, e1, e2)) $startpos }
+	| LET; id = ID; EQUALS; value_exp = expr; IN; body_exp = expr
+    { make_node (Let ({ id; value_exp; body_exp })) $startpos }
 	| LPAREN; e = expr; RPAREN
     { e }
 

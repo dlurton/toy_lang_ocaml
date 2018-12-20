@@ -13,7 +13,7 @@ let eval e top_env : interp_result =
     match (left, right) with
     | (Int32 lval, Int32 rval) -> Int32(lval + rval)
   in
-  let rec innerEval (e: expr) (env: string -> value option) : value =
+  let rec innerEval (e: expr_t) (env: string -> value_t option) : value_t =
     match e.exp with
     | Var v ->
       begin
@@ -28,10 +28,10 @@ let eval e top_env : interp_result =
       let lvalue = innerEval l env in
       let rvalue = innerEval r env in
       add_scalars lvalue rvalue
-    | Let(name, valueExp, bodyExp) ->
-      let the_value = innerEval valueExp env in
-      let nested_env = extend_env env name the_value in
-      innerEval bodyExp nested_env
+    | Let({ id; value_exp; body_exp }) ->
+      let the_value = innerEval value_exp env in
+      let nested_env = extend_env env id the_value in
+      innerEval body_exp nested_env
   in
   try InterpSuccess(innerEval e top_env)
   with InterpExn (loc, msg) ->
@@ -53,7 +53,7 @@ let parse s =
   with LexicalExn(src_loc, msg) ->
     ParseError(src_loc, "Lexical error: " ^ msg)
     | Parser.Error ->
-       ParseError(make_source_location "TODO" 1 1, "Syntax error")
+       ParseError(make_src_loc "TODO" 1 1, "Syntax error")
 
 
 

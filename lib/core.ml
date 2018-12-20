@@ -12,6 +12,7 @@ let eval e top_env : interp_result =
   let add_scalars left right  =
     match (left, right) with
     | (VAL_i32 lval, VAL_i32 rval) -> VAL_i32(lval + rval)
+    | _ -> failwith ("One or more values cannot be added")
   in
   let rec inner_eval (e: expr_t) (env: string -> value_t option) : value_t =
     match e.exp with
@@ -32,6 +33,16 @@ let eval e top_env : interp_result =
       let the_value = inner_eval value_exp env in
       let nested_env = extend_env env id the_value in
       inner_eval body_exp nested_env
+    | EXPN_func(id, body_exp) -> VAL_func(id, body_exp)
+    | EXPN_call(func_exp, arg_exp) ->
+      let proc_val = inner_eval func_exp env in
+      match proc_val with
+      | VAL_func(arg_name, body_exp) ->
+        let arg_value = inner_eval arg_exp env in
+        let call_env = extend_env env arg_name arg_value in
+        inner_eval body_exp call_env
+      | _ -> failwith "TODO: error handling when proc expr is not a proc"
+
   in
   try IR_success(inner_eval e top_env)
   with InterpExn (loc, msg) ->

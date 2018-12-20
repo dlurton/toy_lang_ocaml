@@ -3,7 +3,10 @@
 This repository contains a basic interpreter suitable as a starting point for a toy language.
 
 It is derived from the Cornell University (I think) CS3110 lab described [here](https://www.cs.cornell.edu/courses/cs3110/2015fa/l/12-interp/rec.html)
-but has been heavily modified. The original files can be downloaded [here](https://www.cs.cornell.edu/courses/cs3110/2015fa/l/12-interp/rec-code.zip).
+but has been heavily modified with inspiration from "Essentials of Programming Languages" by Friedman and Wand.  The
+example code from the book can be found [here](https://github.com/mwand/eopl3).
+
+The original files can be downloaded [here](https://www.cs.cornell.edu/courses/cs3110/2015fa/l/12-interp/rec-code.zip).
 
 Prerequisites:
 

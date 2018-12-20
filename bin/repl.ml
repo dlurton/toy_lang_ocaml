@@ -27,13 +27,13 @@ let rec interpret_line () =
         (* attempt to parse the line *)
         let presult = parse(line_text) in
         match presult with
-        | ParseError(sloc, pmsg) -> show_error sloc pmsg
-        | ParseSuccess e ->
+        | PR_error(sloc, pmsg) -> show_error sloc pmsg
+        | PR_success e ->
           (* attempt to interpret the AST *)
           let iresult = eval_with_empty_env e in
           match iresult with
-          | InterpError(sloc, imsg) -> show_error sloc imsg
-          | InterpSuccess value ->
+          | IR_error(sloc, imsg) -> show_error sloc imsg
+          | IR_success(value) ->
             print_endline(value_to_string(value))
   end;
   interpret_line()

@@ -118,13 +118,13 @@ prog:
      *)
 expr:
 	| i = INT
-    { make_node (Literal(Int32(i))) $startpos }
+    { make_node (EXPN_literal(VAL_i32(i))) $startpos }
 	| x = ID
-    { make_node (Var(x)) $startpos }
+    { make_node (EXPN_var(x)) $startpos }
 	| e1 = expr; PLUS; e2 = expr
-    { make_node (Add(e1, e2)) $startpos }
+    { make_node (EXPN_add(e1, e2)) $startpos }
 	| LET; id = ID; EQUALS; value_exp = expr; IN; body_exp = expr
-    { make_node (Let (id, value_exp, body_exp)) $startpos }
+    { make_node (EXPN_let (id, value_exp, body_exp)) $startpos }
 	| LPAREN; e = expr; RPAREN
     { e }
 

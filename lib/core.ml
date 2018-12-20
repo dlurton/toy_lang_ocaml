@@ -11,11 +11,11 @@ let extend_env env id value = fun lookup ->
 let eval e top_env : interp_result =
   let add_scalars left right  =
     match (left, right) with
-    | (Int32 lval, Int32 rval) -> Int32(lval + rval)
+    | (VAL_i32 lval, VAL_i32 rval) -> VAL_i32(lval + rval)
   in
   let rec inner_eval (e: expr_t) (env: string -> value_t option) : value_t =
     match e.exp with
-    | Var v ->
+    | EXPN_var v ->
       begin
         let value = env(v) in
         match value with
@@ -23,19 +23,19 @@ let eval e top_env : interp_result =
         | None -> raise (InterpExn(e.loc, "Unbound variable '" ^ v ^ "'"))
         | Some v -> v
       end
-    | Literal n -> n
-    | Add(l, r) ->
+    | EXPN_literal n -> n
+    | EXPN_add(l, r) ->
       let lvalue = inner_eval l env in
       let rvalue = inner_eval r env in
       add_scalars lvalue rvalue
-    | Let(id, value_exp, body_exp ) ->
+    | EXPN_let(id, value_exp, body_exp ) ->
       let the_value = inner_eval value_exp env in
       let nested_env = extend_env env id the_value in
       inner_eval body_exp nested_env
   in
-  try InterpSuccess(inner_eval e top_env)
+  try IR_success(inner_eval e top_env)
   with InterpExn (loc, msg) ->
-    InterpError(loc, msg)
+    IR_error(loc, msg)
 
 (* Evaluates the parsed expression with an empty environment. *)
 let eval_with_empty_env e =
@@ -49,11 +49,11 @@ let parse s =
   let lexbuf = Lexing.from_string(s) in
   try
     let ast = Parser.prog Lexer.read lexbuf in
-    ParseSuccess(ast)
+    PR_success(ast)
   with LexicalExn(src_loc, msg) ->
-    ParseError(src_loc, "Lexical error: " ^ msg)
+    PR_error(src_loc, "Lexical error: " ^ msg)
     | Parser.Error ->
-       ParseError(make_src_loc "TODO" 1 1, "Syntax error")
+       PR_error(make_src_loc "TODO" 1 1, "Syntax error")
 
 
 

@@ -22,7 +22,7 @@ let dummy_src_loc = {
 }
 
 type value_t =
-  | Int32 of int
+  | VAL_i32 of int 
 
 (* The AST. *)
 type expr_t = {
@@ -30,27 +30,27 @@ type expr_t = {
   loc : src_loc_t;
 }
 and expr_node_t =
-  | Var of string
-  | Literal of value_t
-  | Add of expr_t * expr_t
-  | Let of string * expr_t * expr_t
+  | EXPN_var of string
+  | EXPN_literal of value_t
+  | EXPN_add of expr_t * expr_t
+  | EXPN_let of string * expr_t * expr_t
   (*| Proc of string * expr *)
 
 let value_to_int = function
-  | Int32 i -> i
+  | VAL_i32 i -> i
 
 let value_to_string = function
-  | Int32 i -> string_of_int(i)
+  | VAL_i32 i -> string_of_int(i)
 
 (* The result of an attempt to parse a snippet of code. *)
 type parse_result =
-    ParseError of src_loc_t * string
-  | ParseSuccess of expr_t
+    PR_error of src_loc_t * string
+  | PR_success of expr_t
 
 (* The result of an attempt to interpret an AST. *)
 type interp_result =
-    InterpError of src_loc_t * string
-  | InterpSuccess of value_t
+    IR_error of src_loc_t * string
+  | IR_success of value_t
 
 (* Exception thrown by the lexer when an error is encountered. *)
 exception LexicalExn of src_loc_t * string

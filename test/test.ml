@@ -5,12 +5,12 @@ open Toy_lang.Core;;
 let test_int (s: string) : int =
   let presult = parse(s) in
   match presult with
-  | ParseError(_, pmsg) -> failwith("Parse error: " ^ pmsg)
-  | ParseSuccess e ->
+  | PR_error(_, pmsg) -> failwith("Parse error: " ^ pmsg)
+  | PR_success e ->
     let iresult = eval_with_empty_env e in
     match iresult with
-    | InterpError (_, imsg) -> failwith("Interp error: " ^ imsg)
-    | InterpSuccess r -> value_to_int(r)
+    | IR_error (_, imsg) -> failwith("Interp error: " ^ imsg)
+    | IR_success r -> value_to_int(r)
 
 (* A few test cases *)
 let run_tests ()  =

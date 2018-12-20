@@ -1,14 +1,11 @@
 open Types
 
-
-    
-
 (* An environment that has no variable and no parent. *)
 let empty_env = fun _ -> None
 
 (* Nests the specified env in another env that has a variable. *)
 let extend_env env id value = fun lookup ->
-  if id == lookup then Some(value) else env lookup
+  if String.equal id lookup then Some(value) else env lookup
 
 (* Evaluates the parsed expression with the specified top-level environment. *)
 let eval e top_env : interp_result =

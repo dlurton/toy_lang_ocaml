@@ -1,0 +1,6 @@
+
+(library (public_name toy_lang))
+
+(ocamllex lexer)
+
+(menhir (modules parser))

@@ -1,21 +1,14 @@
 open Types
-open Lexer
-open Lexing
-open Parsing
 
-(*
-   Menhir reference manual: http://gallium.inria.fr/~fpottier/menhir/manual.pdf
-   Lexing module documentation: https://caml.inria.fr/pub/docs/manual-ocaml/libref/Lexing.html
-*)
 
+    
 
 (* An environment that has no variable and no parent. *)
 let empty_env = fun _ -> None
 
 (* Nests the specified env in another env that has a variable. *)
-let extend_env env name value = fun lookup ->
-  match lookup with
-  | name -> Some(value)
+let extend_env env id value = fun lookup ->
+  if id == lookup then Some(value) else env lookup
 
 (* Evaluates the parsed expression with the specified top-level environment. *)
 let eval e top_env : interp_result =

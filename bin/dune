@@ -1,0 +1,7 @@
+(executables
+    (names repl)
+    (libraries toy_lang))
+
+(install
+    (section bin)
+    (files (repl.exe as toy-repl)))

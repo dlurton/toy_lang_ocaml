@@ -1,5 +1,5 @@
-open Types
-open Core;;
+open Toy_lang.Types
+open Toy_lang.Core;;
 
 (* TODO: fold in to pattern matched eval function *)
 let test_int (s: string) : int =

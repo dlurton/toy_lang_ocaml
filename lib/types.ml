@@ -25,12 +25,7 @@ type value_t =
   | Int32 of int
 
 (* The AST. *)
-type let_t = {
-  id : string;
-  value_exp : expr_t;
-  body_exp : expr_t;
-}
-and expr_t = {
+type expr_t = {
   exp : expr_node_t;
   loc : src_loc_t;
 }
@@ -38,16 +33,14 @@ and expr_node_t =
   | Var of string
   | Literal of value_t
   | Add of expr_t * expr_t
-  | Let of let_t
+  | Let of string * expr_t * expr_t
   (*| Proc of string * expr *)
-
 
 let value_to_int = function
   | Int32 i -> i
 
 let value_to_string = function
   | Int32 i -> string_of_int(i)
-
 
 (* The result of an attempt to parse a snippet of code. *)
 type parse_result =

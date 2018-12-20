@@ -13,7 +13,7 @@ let eval e top_env : interp_result =
     match (left, right) with
     | (Int32 lval, Int32 rval) -> Int32(lval + rval)
   in
-  let rec innerEval (e: expr_t) (env: string -> value_t option) : value_t =
+  let rec inner_eval (e: expr_t) (env: string -> value_t option) : value_t =
     match e.exp with
     | Var v ->
       begin
@@ -25,15 +25,15 @@ let eval e top_env : interp_result =
       end
     | Literal n -> n
     | Add(l, r) ->
-      let lvalue = innerEval l env in
-      let rvalue = innerEval r env in
+      let lvalue = inner_eval l env in
+      let rvalue = inner_eval r env in
       add_scalars lvalue rvalue
-    | Let({ id; value_exp; body_exp }) ->
-      let the_value = innerEval value_exp env in
+    | Let(id, value_exp, body_exp ) ->
+      let the_value = inner_eval value_exp env in
       let nested_env = extend_env env id the_value in
-      innerEval body_exp nested_env
+      inner_eval body_exp nested_env
   in
-  try InterpSuccess(innerEval e top_env)
+  try InterpSuccess(inner_eval e top_env)
   with InterpExn (loc, msg) ->
     InterpError(loc, msg)
 

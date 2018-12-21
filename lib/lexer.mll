@@ -59,6 +59,8 @@ rule read =
   | "func" { FUNC }
   | "="    { EQUALS }
   | "in"   { IN }
+  | "{"    { OPEN_CURLY }
+  | "}"    { CLOSE_CURLY }
   | id     { ID (Lexing.lexeme lexbuf) }
   | int    { INT (int_of_string (Lexing.lexeme lexbuf)) }
   | eof    { EOF }

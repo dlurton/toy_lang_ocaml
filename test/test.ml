@@ -27,13 +27,14 @@ let run_tests ()  =
   (* let *)
   assert (22 = test_int "let x = 22 in x");
   assert (22 = test_int "let x = 0 in let x = 22 in x");
+  assert (22 = test_int "let x = 0 in let x = 21 in x + 1");
 
   (* functions *)
-  assert (22 = test_int "(func(f) f + 1)(21)");
-  assert (22 = test_int "let p = func(f) f + 1 in p(21)");
-  assert (22 = test_int "(func(f) f(21))(func(x) x + 1)");
-  assert (22 = test_int "(func(x) func(y) x + y)(10)(12)");
-  assert (22 = test_int "let f = func(x) func(y) x + y in f(10)(12)");
+  assert (22 = test_int "(func(f) { f + 1 })(21)");
+  assert (22 = test_int "let p = func(f) { f + 1 } in p(21)");
+  assert (22 = test_int "(func(f) { f(21) })(func(x) { x + 1 })");
+  assert (22 = test_int "(func(x) { func(y) { x + y } })(10)(12)");
+  assert (22 = test_int "let f = func(x) { func(y) { x + y } } in f(10)(12)");
 
   (*Migrate the following test cases as well:
       

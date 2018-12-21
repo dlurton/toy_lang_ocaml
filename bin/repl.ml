@@ -1,7 +1,7 @@
 
 open Toy_lang.Types
 open Toy_lang.Core
-
+open Toy_lang.Pretty
 ;;
 
 (* program entry point *)
@@ -34,7 +34,7 @@ let rec interpret_line () =
           match iresult with
           | IR_error(sloc, imsg) -> show_error sloc imsg
           | IR_success(value) ->
-            print_endline(value_to_string(value))
+            print_endline(pretty_string_of_value value)
   end;
   interpret_line()
 in

@@ -33,13 +33,13 @@ let eval e top_env : interp_result =
       let the_value = inner_eval value_exp env in
       let nested_env = extend_env env id the_value in
       inner_eval body_exp nested_env
-    | EXPN_func(id, body_exp) -> VAL_func(id, body_exp)
+    | EXPN_func(id, body_exp) -> VAL_func(id, body_exp, env)
     | EXPN_call(func_exp, arg_exp) ->
       let proc_val = inner_eval func_exp env in
       match proc_val with
-      | VAL_func(arg_name, body_exp) ->
+      | VAL_func(arg_name, body_exp, captured_env) ->
         let arg_value = inner_eval arg_exp env in
-        let call_env = extend_env env arg_name arg_value in
+        let call_env = extend_env captured_env arg_name arg_value in
         inner_eval body_exp call_env
       | _ -> failwith "TODO: error handling when proc expr is not a proc"
 

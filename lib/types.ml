@@ -21,12 +21,13 @@ let dummy_src_loc = {
   char_offset = -1;
 }
 
+type env_t = string -> value_t option
 (* The types of the language. *)
-type value_t =
+and value_t =
   | VAL_i32 of int
-  | VAL_func of string * expr_t
+  | VAL_func of string * expr_t * env_t
 (* The AST. *)
-and expr_t ={
+and expr_t = {
   exp : expr_node_t;
   loc : src_loc_t;
 }

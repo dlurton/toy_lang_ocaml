@@ -13,9 +13,10 @@ Prerequisites:
 - `opam init`
 - `opam setup -a`
 - `opam install menhir`
-- 'opam install dune'
+- `opam install linenoise`
+- `opam install dune`
 
-To build, run `dune build` from the project's root directory.  To test, build and then run `dune runtest`.
+To build, run `dune build` from the project's root directory.  To build and test, run `dune runtest`.
 
 I also recommend:
 
@@ -34,4 +35,7 @@ Tested with `ocamlc` 4.07.1.
 - [OUnit Documentation](http://ounit.forge.ocamlcore.org/api-ounit/index.html)
 - [OCaml Stack Overflow](https://stackoverflow.com/questions/tagged/ocaml)i
 - [Menhir reference manual](http://gallium.inria.fr/~fpottier/menhir/manual.pdf)
-- [Lexing module documentation: https://caml.inria.fr/pub/docs/manual-ocaml/libref/Lexing.html]
+- [Lexing module documentation](https://caml.inria.fr/pub/docs/manual-ocaml/libref/Lexing.html)
+- [opam packaging](https://opam.ocaml.org/doc/Packaging.html) (Describies files like `toy_lang.opam`)
+- [Starting a new project with dune](https://medium.com/@bobbypriambodo/starting-an-ocaml-app-project-using-dune-d4f74e291de8)
+

@@ -1,6 +1,6 @@
 (executables
     (names repl)
-    (libraries toy_lang))
+    (libraries linenoise toy_lang))
 
 (install
     (section bin)

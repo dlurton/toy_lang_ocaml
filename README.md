@@ -25,7 +25,8 @@ I also recommend:
 
 ## TODO
 
-- Use `ounit2` instead of whatever is going on in `test/test.ml`
+- Add support for more artihmetic operators (-, *, /, %, etc)
+- Add `if` expression, support for functions such as `zero?`
 - Add the language features of your choice.
 
 Tested with `ocamlc` 4.07.1.

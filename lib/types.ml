@@ -25,8 +25,11 @@ let dummy_src_loc = {
   char_offset = -1;
 }
 
-type env_t = string -> value_t option
+type op_t =
+  | OP_add
+  | OP_equals
 
+type env_t = string -> value_t option
 (* The types of the language. *)
 and value_t =
   | VAL_bool of bool
@@ -40,11 +43,13 @@ and expr_t = {
 and expr_node_t =
   | EXPN_var of string
   | EXPN_literal of value_t
-  | EXPN_add of expr_t * expr_t
+  | EXPN_binary of op_t * expr_t * expr_t
   | EXPN_let of string * expr_t * expr_t
   | EXPN_if of expr_t * expr_t * expr_t
   | EXPN_func of string * expr_t
   | EXPN_call of expr_t * expr_t
+
+
 
 (* TODO: parse_result and interp_result really should have the _t suffix. *)
 (* The result of an attempt to parse a snippet of code. *)

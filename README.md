@@ -14,6 +14,7 @@ Prerequisites:
 - `opam setup -a`
 - `opam install menhir`
 - `opam install linenoise`
+- `opam install ounit`
 - `opam install unix`
 - `opam install dune`
 
@@ -26,10 +27,20 @@ I also recommend:
 ## TODO
 
 - Add support for more artihmetic operators (-, *, /, %, etc)
-- Add `if` expression, support for functions such as `zero?`
 - Add the language features of your choice.
 
 Tested with `ocamlc` 4.07.1.
+
+## Working With Menhir 
+
+If, after modifying `parser.mly` a message appears about shift/reduce conflicts, it can be hard to diagnose
+what's going on.  To get `menhir` to tell you about the shift/reduce conflicts, execute
+
+```
+menhir --explain lib/parser.mly
+``
+
+Then, you can examine the file `lib/parser.conflicts` to read about the first shift/reduce conflict detected.
 
 ## Helpful links
  

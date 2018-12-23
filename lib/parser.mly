@@ -17,9 +17,11 @@ open Util
 %token EOF
 %token OPEN_CURLY CLOSE_CURLY
 
-%nonassoc IN
+%nonassoc IN ELSE
+%left EQUALS
 %left PLUS
 %nonassoc LPAREN
+
 %start <Types.expr_t> prog
 
 %%
@@ -41,8 +43,10 @@ expr:
      { make_node (EXPN_call(proc_expr, arg)) $startpos }
   | LPAREN; e = expr; RPAREN
      { e }
+  | e1 = expr; EQUALS; e2 = expr
+    { make_node (EXPN_binary(OP_equals, e1, e2)) $startpos }
   | e1 = expr; PLUS; e2 = expr
-    { make_node (EXPN_add(e1, e2)) $startpos }
+    { make_node (EXPN_binary(OP_add, e1, e2)) $startpos }
   | IF; cond_exp = expr; THEN; then_exp = expr; ELSE; else_exp = expr;
     { make_node (EXPN_if (cond_exp, then_exp, else_exp)) $startpos }
   | LET; id = ID; EQUALS; value_exp = expr; IN; body_exp = expr

@@ -19,19 +19,29 @@ let eval e top_env : interp_result =
         | Some v -> v
       end
     | EXPN_literal n -> n
-    | EXPN_add(left, right) ->
+    | EXPN_binary(op, left, right) ->
       begin
-        let lval = inner_eval left env in
-        let rval = inner_eval right env in
-        match (lval, rval) with
-        (* we have integers on both sides -- perform addition *)
-        | (VAL_i32 lval, VAL_i32 rval) -> VAL_i32(lval + rval)
-        (* non-integer on right side, use location of right hand expression *)
-        | (VAL_i32 _, _) -> raise (InterpExn(right.loc, ERR_arithmetic_on_non_number))
-        (* non-integer on left side, use location of left hand expression *)
-        | (_, VAL_i32 _) -> raise (InterpExn(left.loc, ERR_arithmetic_on_non_number))
-        (* non-integer on both sides, location of `e` *)
-        | (_, _) -> raise (InterpExn(e.loc, ERR_arithmetic_on_non_number))
+        let values = ((inner_eval left env), (inner_eval right env)) in
+        match op with
+        | OP_equals ->
+          begin
+            match values with
+            | (VAL_i32 lval, VAL_i32 rval) -> VAL_bool(lval = rval)
+            | (VAL_bool lval, VAL_bool rval) -> VAL_bool(lval = rval)
+            | (_, _) -> VAL_bool(false)
+          end
+        | OP_add ->
+          begin
+            match values with
+            (* we have integers on both sides -- perform addition *)
+            | (VAL_i32 lval, VAL_i32 rval) -> VAL_i32(lval + rval)
+            (* non-integer on right side, use location of right hand expression *)
+            | (VAL_i32 _, _) -> raise (InterpExn(right.loc, ERR_arithmetic_on_non_number))
+            (* non-integer on left side, use location of left hand expression *)
+            | (_, VAL_i32 _) -> raise (InterpExn(left.loc, ERR_arithmetic_on_non_number))
+            (* non-integer on both sides, location of `e` *)
+            | (_, _) -> raise (InterpExn(e.loc, ERR_arithmetic_on_non_number))
+          end
       end
     | EXPN_if(cond_exp, then_exp, else_exp) ->
       let cond_val = inner_eval cond_exp env in

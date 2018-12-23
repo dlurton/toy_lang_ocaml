@@ -1,0 +1,8 @@
+# this file can be "sourced" to quickly help diagnose shift/reduce conflicts in parser.mly
+
+menhir --explain lib/parser.mly
+cat lib/parser.conflicts
+# clean up -- the problem is that running menhir directly like this
+# creates these junk files that cause the build to fail later
+rm lib/parser.conflicts lib/parser.ml lib/parser.mli
+

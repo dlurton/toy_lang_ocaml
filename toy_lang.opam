@@ -12,7 +12,7 @@ depends: [
   "menhir" 
   "unix"
   "linenoise" 
-  "ounit" {with-test}
+  "oUnit"
 ]
 build: [
   ["dune" "build" "-p" name "-j" jobs]

@@ -1,3 +1,4 @@
 (test
  (name test)
- (libraries toy_lang))
+ (libraries toy_lang oUnit))
+

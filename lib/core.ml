@@ -9,30 +9,37 @@ let extend_env env id value = fun lookup ->
 
 (* Evaluates the parsed expression with the specified top-level environment. *)
 let eval e top_env : interp_result =
-  let add_scalars left right =
-    match (left, right) with
-    | (VAL_i32 lval, VAL_i32 rval) -> VAL_i32(lval + rval)
-    | _ -> failwith ("One or more values cannot be added")
-  in
   let rec inner_eval (e: expr_t) (env: env_t) =
     match e.exp with
-    | EXPN_var v ->
+    | EXPN_var id ->
       begin
-        let value = env v in
+        let value = env id in
         match value with
-        (* TODO: don't throw an exception here? *)
-        | None -> raise (InterpExn(e.loc, "Unbound variable '" ^ v ^ "'"))
+        | None -> raise (InterpExn(e.loc, ERR_unbound_var(id)))
         | Some v -> v
       end
     | EXPN_literal n -> n
-    | EXPN_add(l, r) -> add_scalars (inner_eval l env) (inner_eval r env)
+    | EXPN_add(left, right) ->
+      begin
+        let lval = inner_eval left env in
+        let rval = inner_eval right env in
+        match (lval, rval) with
+        (* we have integers on both sides -- perform addition *)
+        | (VAL_i32 lval, VAL_i32 rval) -> VAL_i32(lval + rval)
+        (* non-integer on right side, use location of right hand expression *)
+        | (VAL_i32 _, _) -> raise (InterpExn(right.loc, ERR_arithmetic_on_non_number))
+        (* non-integer on left side, use location of left hand expression *)
+        | (_, VAL_i32 _) -> raise (InterpExn(left.loc, ERR_arithmetic_on_non_number))
+        (* non-integer on both sides, location of `e` *)
+        | (_, _) -> raise (InterpExn(e.loc, ERR_arithmetic_on_non_number))
+      end
     | EXPN_if(cond_exp, then_exp, else_exp) ->
       let cond_val = inner_eval cond_exp env in
       begin
         match cond_val with
         | VAL_bool(true) -> inner_eval then_exp env
         | VAL_bool(false) -> inner_eval else_exp env
-        | _ -> raise (InterpExn(e.loc, "if condition did not evaluate to a boolean value"))
+        | _ -> raise (InterpExn(cond_exp.loc, ERR_if_cond_not_bool))
       end
     | EXPN_let(id, value_exp, body_exp ) ->
       let the_value = inner_eval value_exp env in
@@ -47,10 +54,8 @@ let eval e top_env : interp_result =
           let arg_value = inner_eval arg_exp env in
           let call_env = extend_env captured_env arg_name arg_value in
           inner_eval body_exp call_env
-        | _ -> failwith "TODO: error handling when proc expr is not a proc"
+        | _ -> raise (InterpExn(e.loc, ERR_invoked_non_func))
       end
-
-
   in
   try IR_success(inner_eval e top_env)
   with InterpExn (loc, msg) ->

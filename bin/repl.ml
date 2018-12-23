@@ -26,7 +26,7 @@ let interpret_line line_text =
     (* attempt to interpret the AST *)
     let iresult = eval_with_empty_env e in
     match iresult with
-    | IR_error(sloc, imsg) -> show_error sloc imsg
+    | IR_error(sloc, err) -> show_error sloc (string_of_error err)
     | IR_success value ->
       print_endline(pretty_string_of_value(value))
 

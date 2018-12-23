@@ -10,6 +10,7 @@ open Util
 %token LPAREN
 %token RPAREN
 %token LET
+%token IF THEN ELSE
 %token FUNC
 %token EQUALS
 %token IN
@@ -23,7 +24,7 @@ open Util
 
 %%
 
-prog: 
+prog:
 	| e = expr; EOF { e }
 	;
 
@@ -42,7 +43,8 @@ expr:
      { e }
   | e1 = expr; PLUS; e2 = expr
     { make_node (EXPN_add(e1, e2)) $startpos }
-  (*  | IF; cond_exp = expr; *)
+  | IF; cond_exp = expr; THEN; then_exp = expr; ELSE; else_exp = expr;
+    { make_node (EXPN_if (cond_exp, then_exp, else_exp)) $startpos }
   | LET; id = ID; EQUALS; value_exp = expr; IN; body_exp = expr
     { make_node (EXPN_let (id, value_exp, body_exp)) $startpos }
    (*TODO: is it possible to *not* require the func body to be wrapped in { }?  Without them

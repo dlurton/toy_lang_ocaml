@@ -46,6 +46,10 @@ let suite = "toy_lang_suite" >:::
               "binary_add_2">::expect_int 196 "97 + 99";
               "binary_add_with_parens">::expect_int 22 "(10 + 1) + (5 + 6)";
 
+              (* if *)
+              "if_1">::expect_int 1 "if true then 1 else 2";
+              "if_2">::expect_int 2 "if false then 1 else 2";
+
               (* let *)
               "let_1">::expect_int 99 "let x = 99 in x";
               "let_shadow_1">::expect_int 101 "let x = 99 in let x = 101 in x";

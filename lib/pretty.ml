@@ -13,6 +13,11 @@ let rec pretty_string_of_expr e =
       let lvalue = pretty_string_of_expr l in
       let rvalue = pretty_string_of_expr r in
       sprintf " %s + %s " lvalue rvalue
+    | EXPN_if(c, t, e) ->
+      sprintf "if %s then %s else %s"
+        (pretty_string_of_expr c)
+        (pretty_string_of_expr t)
+        (pretty_string_of_expr e)
     | EXPN_let(name, value_exp, body_exp) ->
       let value_str = pretty_string_of_expr value_exp in
       let body_str = pretty_string_of_expr body_exp in

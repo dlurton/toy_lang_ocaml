@@ -63,9 +63,9 @@ rule read =
   | "}"     { CLOSE_CURLY }
   | "true"  { TRUE }
   | "false" { FALSE }
-  (*| "if"    { IF }
+  | "if"    { IF }
   | "then"  { THEN }
-    | "else"  { ELSE } *)
+  | "else"  { ELSE }
   | id      { ID (Lexing.lexeme lexbuf) }
   | int     { INT (int_of_string (Lexing.lexeme lexbuf)) }
   | eof     { EOF }

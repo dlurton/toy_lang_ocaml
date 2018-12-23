@@ -38,6 +38,7 @@ and expr_node_t =
   | EXPN_literal of value_t
   | EXPN_add of expr_t * expr_t
   | EXPN_let of string * expr_t * expr_t
+  | EXPN_if of expr_t * expr_t * expr_t
   | EXPN_func of string * expr_t
   | EXPN_call of expr_t * expr_t
 

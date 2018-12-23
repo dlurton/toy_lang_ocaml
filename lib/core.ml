@@ -26,6 +26,14 @@ let eval e top_env : interp_result =
       end
     | EXPN_literal n -> n
     | EXPN_add(l, r) -> add_scalars (inner_eval l env) (inner_eval r env)
+    | EXPN_if(cond_exp, then_exp, else_exp) ->
+      let cond_val = inner_eval cond_exp env in
+      begin
+        match cond_val with
+        | VAL_bool(true) -> inner_eval then_exp env
+        | VAL_bool(false) -> inner_eval else_exp env
+        | _ -> raise (InterpExn(e.loc, "if condition did not evaluate to a boolean value"))
+      end
     | EXPN_let(id, value_exp, body_exp ) ->
       let the_value = inner_eval value_exp env in
       let nested_env = extend_env env id the_value in
@@ -33,12 +41,15 @@ let eval e top_env : interp_result =
     | EXPN_func(id, body_exp) -> VAL_func(id, body_exp, env)
     | EXPN_call(func_exp, arg_exp) ->
       let proc_val = inner_eval func_exp env in
-      match proc_val with
-      | VAL_func(arg_name, body_exp, captured_env) ->
-        let arg_value = inner_eval arg_exp env in
-        let call_env = extend_env captured_env arg_name arg_value in
-        inner_eval body_exp call_env
-      | _ -> failwith "TODO: error handling when proc expr is not a proc"
+      begin
+        match proc_val with
+        | VAL_func(arg_name, body_exp, captured_env) ->
+          let arg_value = inner_eval arg_exp env in
+          let call_env = extend_env captured_env arg_name arg_value in
+          inner_eval body_exp call_env
+        | _ -> failwith "TODO: error handling when proc expr is not a proc"
+      end
+
 
   in
   try IR_success(inner_eval e top_env)

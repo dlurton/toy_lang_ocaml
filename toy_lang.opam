@@ -7,11 +7,11 @@ homepage: "https://github.com/dlurton/toy_lang_ocaml"
 bug-reports: "https://github.com/dlurton/toy_lang_ocaml/issues"
 dev-repo: "git+https://github.com/dlurton/toy_lang_ocaml.git"
 license: "Apache-2.0"
-depends: [ 
-  "ocaml" 
-  "menhir" 
+depends: [
+  "ocaml"
+  "menhir"
   "unix"
-  "linenoise" 
+  "linenoise"
   "oUnit"
 ]
 build: [

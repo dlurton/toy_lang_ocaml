@@ -51,19 +51,24 @@ let id = letter+
 
 rule read =
   parse
-  | white  { read lexbuf }
-  | "+"    { PLUS }
-  | "("    { LPAREN }
-  | ")"    { RPAREN }
-  | "let"  { LET }
-  | "func" { FUNC }
-  | "="    { EQUALS }
-  | "in"   { IN }
-  | "{"    { OPEN_CURLY }
-  | "}"    { CLOSE_CURLY }
-  | id     { ID (Lexing.lexeme lexbuf) }
-  | int    { INT (int_of_string (Lexing.lexeme lexbuf)) }
-  | eof    { EOF }
+  | white   { read lexbuf }
+  | "+"     { PLUS }
+  | "("     { LPAREN }
+  | ")"     { RPAREN }
+  | "let"   { LET }
+  | "func"  { FUNC }
+  | "="     { EQUALS }
+  | "in"    { IN }
+  | "{"     { OPEN_CURLY }
+  | "}"     { CLOSE_CURLY }
+  | "true"  { TRUE }
+  | "false" { FALSE }
+  (*| "if"    { IF }
+  | "then"  { THEN }
+    | "else"  { ELSE } *)
+  | id      { ID (Lexing.lexeme lexbuf) }
+  | int     { INT (int_of_string (Lexing.lexeme lexbuf)) }
+  | eof     { EOF }
   | _ {
       let illegal_c = Lexing.lexeme lexbuf in
       raise_lexical_error lexbuf ("Illegal character: " ^ illegal_c)

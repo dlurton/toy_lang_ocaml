@@ -25,6 +25,7 @@ let rec pretty_string_of_expr e =
       let body_str = pretty_string_of_expr body_exp in
       sprintf "func(%s) %s" arg_name body_str
 and pretty_string_of_value = function
+   | VAL_bool b -> string_of_bool b
    | VAL_i32 i -> string_of_int i
    | VAL_func(arg_name, body_exp, _) ->
       let body_str = pretty_string_of_expr body_exp in

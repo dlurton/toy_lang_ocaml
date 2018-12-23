@@ -5,6 +5,7 @@ open Util
 
 %token <int> INT
 %token <string> ID
+%token TRUE FALSE
 %token PLUS
 %token LPAREN
 %token RPAREN
@@ -22,11 +23,15 @@ open Util
 
 %%
 
-prog:
+prog: 
 	| e = expr; EOF { e }
 	;
 
 expr:
+  | TRUE
+    { make_node (EXPN_literal(VAL_bool(true))) $startpos}
+  | FALSE
+    { make_node (EXPN_literal(VAL_bool(false))) $startpos }
   | i = INT
     { make_node (EXPN_literal(VAL_i32(i))) $startpos }
   | x = ID
@@ -37,6 +42,7 @@ expr:
      { e }
   | e1 = expr; PLUS; e2 = expr
     { make_node (EXPN_add(e1, e2)) $startpos }
+  (*  | IF; cond_exp = expr; *)
   | LET; id = ID; EQUALS; value_exp = expr; IN; body_exp = expr
     { make_node (EXPN_let (id, value_exp, body_exp)) $startpos }
    (*TODO: is it possible to *not* require the func body to be wrapped in { }?  Without them

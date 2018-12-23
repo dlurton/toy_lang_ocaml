@@ -22,8 +22,10 @@ let dummy_src_loc = {
 }
 
 type env_t = string -> value_t option
+
 (* The types of the language. *)
 and value_t =
+  | VAL_bool of bool
   | VAL_i32 of int
   | VAL_func of string * expr_t * env_t
 (* The AST. *)

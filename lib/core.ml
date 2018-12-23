@@ -1,7 +1,7 @@
 open Types
 
 (* An environment that has no variable and no parent. *)
-let empty_env = fun _ -> None
+let empty_env : env_t = fun _ -> None
 
 (* Nests the specified env in another env that has a variable. *)
 let extend_env env id value = fun lookup ->
@@ -9,26 +9,23 @@ let extend_env env id value = fun lookup ->
 
 (* Evaluates the parsed expression with the specified top-level environment. *)
 let eval e top_env : interp_result =
-  let add_scalars left right  =
+  let add_scalars left right =
     match (left, right) with
     | (VAL_i32 lval, VAL_i32 rval) -> VAL_i32(lval + rval)
     | _ -> failwith ("One or more values cannot be added")
   in
-  let rec inner_eval (e: expr_t) (env: string -> value_t option) : value_t =
+  let rec inner_eval (e: expr_t) (env: env_t) =
     match e.exp with
     | EXPN_var v ->
       begin
-        let value = env(v) in
+        let value = env v in
         match value with
         (* TODO: don't throw an exception here? *)
         | None -> raise (InterpExn(e.loc, "Unbound variable '" ^ v ^ "'"))
         | Some v -> v
       end
     | EXPN_literal n -> n
-    | EXPN_add(l, r) ->
-      let lvalue = inner_eval l env in
-      let rvalue = inner_eval r env in
-      add_scalars lvalue rvalue
+    | EXPN_add(l, r) -> add_scalars (inner_eval l env) (inner_eval r env)
     | EXPN_let(id, value_exp, body_exp ) ->
       let the_value = inner_eval value_exp env in
       let nested_env = extend_env env id the_value in

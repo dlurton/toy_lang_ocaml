@@ -44,6 +44,7 @@ TODO (for now, see test/tests.ml)
 
 ## TODO
 
+- Add support for functions with multiple arguments
 - Add the language features of your choice.
 
 Tested with `ocamlc` 4.07.1.

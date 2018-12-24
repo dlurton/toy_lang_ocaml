@@ -16,16 +16,15 @@ It looked something like: `%token LET "let"`
 %token LET
 %token IF THEN ELSE
 %token FUNC
-%token IN
+%token IN ARROW
 %token EOF
-%token OPEN_CURLY CLOSE_CURLY
 
 (****
   The order of tokens listed here specifies their precedence.
   Tokens appearing later have a higher precedence than those appearing earlier.
  ****)
 
-%nonassoc IN ELSE
+%nonassoc IN ELSE ARROW
 %left EQUALS
 %left ADD SUB
 (*
@@ -82,12 +81,8 @@ expr:
   (* let expression *)
   | LET; id = ID; EQUALS; value_exp = expr; IN; body_exp = expr
     { make_node (EXPN_let (id, value_exp, body_exp)) $startpos }
-   (*TODO: is it possible to *not* require the func body to be wrapped in { }?  Without them
-    there is a shift/reduce conflict I can't seem to solve, but that might be because I'm
-    a noob.
-    *)
 
   (* function constructor expression *)
-  | FUNC; LPAREN; var_name = ID; RPAREN; OPEN_CURLY; body = expr; CLOSE_CURLY;
+  | FUNC; var_name = ID; ARROW; body = expr;
     { make_node (EXPN_func(var_name, body)) $startpos }
   ;

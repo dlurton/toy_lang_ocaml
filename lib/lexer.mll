@@ -34,11 +34,10 @@ rule read =
   | "("     { LPAREN }
   | ")"     { RPAREN }
   | "let"   { LET }
+  | "->"    { ARROW }
   | "func"  { FUNC }
   | "="     { EQUALS }
   | "in"    { IN }
-  | "{"     { OPEN_CURLY }
-  | "}"     { CLOSE_CURLY }
   | "true"  { TRUE }
   | "false" { FALSE }
   | "if"    { IF }

@@ -141,19 +141,10 @@ let suite = "toy_lang_suite" >:::
               "func_in_let">::expect_int 22 "let f = func(x) { func(y) { x + y } } in f(10)(12)";
 
               (* func errors *)
-              "func_call_non_func">::expect_error 1 1 ERR_invoked_non_func "1(1)"
+              "func_call_non_func">::expect_error 1 1 ERR_invoked_non_func "1(1)";
 
-  (*Migrate the following test cases as well:
-      
-      (y-combinator-1 "
-let fix =  proc (f) in
-let d = proc (x) proc (z) ((f (x x)) z) in proc (n) ((f (d d)) n)
-in let
-    t4m = proc (f) proc(x) if zero?(x) then 0 else -((f -(x,1)),-4)
-in let times4 = (fix t4m)
-   in (times4 3)" 12)
-      ))
-*)
+              (* the y-combinator, just because *)
+              (* TODO, here's an example: https://rosettacode.org/wiki/Y_combinator#OCaml *)
             ]
 
 

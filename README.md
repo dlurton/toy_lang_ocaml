@@ -24,9 +24,26 @@ I also recommend:
 
 - `opam install merlin utop ocp-indent tuareg`
 
+## Features
+
+- Supported data types:
+  - int
+  - bool
+  - functions
+- Variables
+- Operators: `+`, `-`, `*`, `/`, `%`
+- Closures
+- Function calls
+- A REPL
+
+## Examples
+
+```
+TODO (for now, see test/tests.ml)
+```
+
 ## TODO
 
-- Add support for more artihmetic operators (-, *, /, %, etc)
 - Add the language features of your choice.
 
 Tested with `ocamlc` 4.07.1.

@@ -1,30 +1,8 @@
 open Types
-
-(* An environment that has no variable and no parent. *)
-let empty_env : env_t = fun _ -> None
-
-(* Nests the specified env in another env that has a variable. *)
-let extend_env env id value = fun search_id ->
-  if id = search_id then
-    Some(value)
-  else
-    env search_id
-
-(*
-   Nests the specified env in another env that has a variable that is backed by a lazily instantiated value.char_offset.
-   This supports `let rec`.
-*)
-let rec extend_env_rec env id value_exp =
-  let rec nested_env search_id =
-     if id = search_id then
-       Some(inner_eval value_exp nested_env)
-     else
-       env search_id
-  in
-  nested_env
+open Env
 
 (* Evaluates the parsed expression with the specified top-level environment. *)
- and inner_eval (e: expr_t) (env: env_t) =
+let rec inner_eval (e: expr_t) (env: env_t) =
     match e.exp with
     | EXPN_var id ->
       begin
@@ -76,7 +54,8 @@ let rec extend_env_rec env id value_exp =
       let nested_env = extend_env env id the_value in
       inner_eval body_exp nested_env
     | EXPN_let_rec(id, value_exp, body_exp) ->
-      let nested_env = extend_env_rec env id value_exp in
+      let value_getter = fun nested_env -> inner_eval value_exp nested_env in
+      let nested_env = extend_env_rec env id value_getter in
       inner_eval body_exp nested_env
     | EXPN_func(id, body_exp) -> VAL_func(id, body_exp, env)
     | EXPN_call(func_exp, arg_exp) ->

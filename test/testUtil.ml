@@ -1,5 +1,7 @@
 open Toy_lang.Types
 open Toy_lang.Core
+open Toy_lang.Env
+
 open OUnit2;;
 
 let test_parse (source: string) : expr_t =

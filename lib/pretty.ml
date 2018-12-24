@@ -12,6 +12,10 @@ let rec pretty_string_of_expr e =
   | EXPN_binary(op, l, r) ->
     let op = match op with
       | OP_add -> "+"
+      | OP_sub -> "-"
+      | OP_mul -> "*"
+      | OP_div -> "/"
+      | OP_mod -> "%"
       | OP_equals -> "="
     in
     let lvalue = pretty_string_of_expr l in

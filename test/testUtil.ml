@@ -2,7 +2,6 @@ open Toy_lang.Types
 open Toy_lang.Core
 open OUnit2;;
 
-
 let test_parse (source: string) : expr_t =
   let presult = parse source in
   match presult with
@@ -30,7 +29,7 @@ let eval_bool src = value_to_bool (test_eval src)
 let expect_int expected_result source =
   (fun _ ->
       let result = eval_int source in
-      assert_equal expected_result result)
+      assert_equal expected_result result ~printer:string_of_int)
 (* TODO: DRY *)
 let expect_bool expected_result source =
   (fun _ ->

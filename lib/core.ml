@@ -22,6 +22,18 @@ let eval e top_env : interp_result =
     | EXPN_binary(op, left, right) ->
       begin
         let values = ((inner_eval left env), (inner_eval right env)) in
+        let binary_int_op (func: int * int -> int) =
+          begin
+            match values with
+            (* we have integers on both sides -- perform addition *)
+            | (VAL_i32 lval, VAL_i32 rval) -> VAL_i32(func(lval, rval))
+            (* non-integer on right side, use location of right hand expression *)
+            | (VAL_i32 _, _) -> raise (InterpExn(right.loc, ERR_arithmetic_on_non_number))
+            (* non-integer on left side, use location of left hand expression *)
+            | (_, VAL_i32 _) -> raise (InterpExn(left.loc, ERR_arithmetic_on_non_number))
+            (* non-integer on both sides, location of `e` *)
+            | (_, _) -> raise (InterpExn(e.loc, ERR_arithmetic_on_non_number))
+          end in
         match op with
         | OP_equals ->
           begin
@@ -30,18 +42,11 @@ let eval e top_env : interp_result =
             | (VAL_bool lval, VAL_bool rval) -> VAL_bool(lval = rval)
             | (_, _) -> VAL_bool(false)
           end
-        | OP_add ->
-          begin
-            match values with
-            (* we have integers on both sides -- perform addition *)
-            | (VAL_i32 lval, VAL_i32 rval) -> VAL_i32(lval + rval)
-            (* non-integer on right side, use location of right hand expression *)
-            | (VAL_i32 _, _) -> raise (InterpExn(right.loc, ERR_arithmetic_on_non_number))
-            (* non-integer on left side, use location of left hand expression *)
-            | (_, VAL_i32 _) -> raise (InterpExn(left.loc, ERR_arithmetic_on_non_number))
-            (* non-integer on both sides, location of `e` *)
-            | (_, _) -> raise (InterpExn(e.loc, ERR_arithmetic_on_non_number))
-          end
+        | OP_add -> binary_int_op (fun (l, r) -> l + r)
+        | OP_sub -> binary_int_op (fun (l, r) -> l - r)
+        | OP_mul -> binary_int_op (fun (l, r) -> l * r)
+        | OP_div -> binary_int_op (fun (l, r) -> l / r)
+        | OP_mod -> binary_int_op (fun (l, r) -> l mod r)
       end
     | EXPN_if(cond_exp, then_exp, else_exp) ->
       let cond_val = inner_eval cond_exp env in

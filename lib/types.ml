@@ -27,6 +27,10 @@ let dummy_src_loc = {
 
 type op_t =
   | OP_add
+  | OP_sub
+  | OP_mul
+  | OP_div
+  | OP_mod
   | OP_equals
 
 type env_t = string -> value_t option

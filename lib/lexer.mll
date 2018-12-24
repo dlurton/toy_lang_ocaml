@@ -26,7 +26,11 @@ let id = letter+
 rule read =
   parse
   | white   { read lexbuf }
-  | "+"     { PLUS }
+  | "+"     { ADD }
+  | "-"     { SUB }
+  | "*"     { MUL }
+  | "/"     { DIV }
+  | "%"     { MOD }
   | "("     { LPAREN }
   | ")"     { RPAREN }
   | "let"   { LET }

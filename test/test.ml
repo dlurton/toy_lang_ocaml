@@ -55,7 +55,6 @@ let suite = "toy_lang_suite" >:::
               "binary_sub_3">::expect_int (-6) "8 - 2 - 12";
               "binary_sub_4">::expect_int 10 "(10 - 1) - (5 - 6)";
 
-
               "binary_mul_01">::expect_int 0 "1 * 0";
               "binary_mul_02">::expect_int 0 "0 * 1";
               "binary_mul_03">::expect_int 1 "1 * 1";

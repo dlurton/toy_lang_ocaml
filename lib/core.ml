@@ -4,12 +4,27 @@ open Types
 let empty_env : env_t = fun _ -> None
 
 (* Nests the specified env in another env that has a variable. *)
-let extend_env env id value = fun lookup ->
-  if String.equal id lookup then Some(value) else env lookup
+let extend_env env id value = fun search_id ->
+  if id = search_id then
+    Some(value)
+  else
+    env search_id
+
+(*
+   Nests the specified env in another env that has a variable that is backed by a lazily instantiated value.char_offset.
+   This supports `let rec`.
+*)
+let rec extend_env_rec env id value_exp =
+  let rec nested_env search_id =
+     if id = search_id then
+       Some(inner_eval value_exp nested_env)
+     else
+       env search_id
+  in
+  nested_env
 
 (* Evaluates the parsed expression with the specified top-level environment. *)
-let eval e top_env : interp_result =
-  let rec inner_eval (e: expr_t) (env: env_t) =
+ and inner_eval (e: expr_t) (env: env_t) =
     match e.exp with
     | EXPN_var id ->
       begin
@@ -60,6 +75,9 @@ let eval e top_env : interp_result =
       let the_value = inner_eval value_exp env in
       let nested_env = extend_env env id the_value in
       inner_eval body_exp nested_env
+    | EXPN_let_rec(id, value_exp, body_exp) ->
+      let nested_env = extend_env_rec env id value_exp in
+      inner_eval body_exp nested_env
     | EXPN_func(id, body_exp) -> VAL_func(id, body_exp, env)
     | EXPN_call(func_exp, arg_exp) ->
       let proc_val = inner_eval func_exp env in
@@ -71,7 +89,8 @@ let eval e top_env : interp_result =
           inner_eval body_exp call_env
         | _ -> raise (InterpExn(e.loc, ERR_invoked_non_func))
       end
-  in
+
+let eval e top_env : interp_result =
   try IR_success(inner_eval e top_env)
   with InterpExn (loc, msg) ->
     IR_error(loc, msg)
@@ -93,6 +112,5 @@ let parse s =
     PR_error(src_loc, "Lexical error: " ^ msg)
     | Parser.Error ->
        PR_error(make_src_loc "TODO" 1 1, "Syntax error")
-
 
 

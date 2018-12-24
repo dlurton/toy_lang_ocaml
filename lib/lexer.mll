@@ -17,7 +17,7 @@ let raise_lexical_error lexbuf msg =
 
 }
 
-let white = [' ' '\t']+
+let white = [' ' '\t' '\r' '\n']+
 let digit = ['0'-'9']
 let int = '-'? digit+
 let letter = ['a'-'z' 'A'-'Z' '_']
@@ -38,6 +38,7 @@ rule read =
   | "("                 { LPAREN }
   | ")"                 { RPAREN }
   | "let"               { LET }
+  | "rec"               { REC }
   | "->"                { ARROW }
   | "func"              { FUNC }
   | "="                 { EQUALS }

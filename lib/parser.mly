@@ -13,7 +13,7 @@ It looked something like: `%token LET "let"`
 %token TRUE FALSE
 %token ADD SUB MUL DIV MOD EQUALS
 %token LPAREN RPAREN
-%token LET
+%token LET REC
 %token IF THEN ELSE
 %token FUNC
 %token IN ARROW
@@ -78,9 +78,11 @@ expr:
   | IF; cond_exp = expr; THEN; then_exp = expr; ELSE; else_exp = expr;
     { make_node (EXPN_if (cond_exp, then_exp, else_exp)) $startpos }
 
-  (* let expression *)
+  (* let & let rec expressions *)
   | LET; id = ID; EQUALS; value_exp = expr; IN; body_exp = expr
     { make_node (EXPN_let (id, value_exp, body_exp)) $startpos }
+  | LET; REC; id = ID; EQUALS; value_exp = expr; IN; body_exp = expr
+    { make_node (EXPN_let_rec (id, value_exp, body_exp)) $startpos }
 
   (* function constructor expression *)
   | FUNC; var_name = ID; ARROW; body = expr;

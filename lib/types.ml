@@ -45,15 +45,14 @@ and expr_t = {
   loc : src_loc_t;
 }
 and expr_node_t =
-  | EXPN_var of string
-  | EXPN_literal of value_t
-  | EXPN_binary of op_t * expr_t * expr_t
-  | EXPN_let of string * expr_t * expr_t
-  | EXPN_if of expr_t * expr_t * expr_t
-  | EXPN_func of string * expr_t
-  | EXPN_call of expr_t * expr_t
-
-
+  | EXPN_var      of string
+  | EXPN_literal  of value_t
+  | EXPN_binary   of op_t * expr_t * expr_t
+  | EXPN_let      of string * expr_t * expr_t
+  | EXPN_let_rec  of string * expr_t * expr_t
+  | EXPN_if       of expr_t * expr_t * expr_t
+  | EXPN_func     of string * expr_t
+  | EXPN_call     of expr_t * expr_t
 
 (* TODO: parse_result and interp_result really should have the _t suffix. *)
 (* The result of an attempt to parse a snippet of code. *)

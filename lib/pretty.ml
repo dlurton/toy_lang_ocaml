@@ -30,6 +30,10 @@ let rec pretty_string_of_expr e =
     let value_str = pretty_string_of_expr value_exp in
     let body_str = pretty_string_of_expr body_exp in
     sprintf "\nlet %s = %s in %s" name value_str body_str
+  | EXPN_let_rec(name, value_exp, body_exp) ->
+    let value_str = pretty_string_of_expr value_exp in
+    let body_str = pretty_string_of_expr body_exp in
+    sprintf "\nlet rec %s = %s in %s" name value_str body_str
   | EXPN_call(proc_exp, arg_exp) ->
     let proc_str = pretty_string_of_expr proc_exp in
     let body_str = pretty_string_of_expr arg_exp in
@@ -43,5 +47,4 @@ and pretty_string_of_value = function
   | VAL_func(arg_name, body_exp, _) ->
     let body_str = pretty_string_of_expr body_exp in
     sprintf "proc(%s) %s" arg_name body_str
-
 

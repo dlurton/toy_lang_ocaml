@@ -132,6 +132,21 @@ let suite = "toy_lang_suite" >:::
               "let_shadow_1">::expect_int 101 "let x = 99 in let x = 101 in x";
               "let_shadow_2">::expect_int 102 "let x = 99 in let x = 101 in x + 1";
 
+              (* let rec *)
+              "let_rec_factorial">::expect_int 40320
+                "let rec fact = func n -> if n = 0 then 1 else n * fact(n - 1) in fact(8)";
+
+              "let_rec_fib">::expect_int 34 {str|
+let rec fib =
+  func n ->
+    // TODO:  when <= is added, change this nested if else to if n <= 1
+    if n = 0 then 1
+    else if n = 1 then 1
+    else fib(n - 1) + fib(n - 2)
+  in
+    fib(8)
+|str};
+
               (* func *)
               "func_1">::expect_int 22 "(func f -> f + 1 )(21)";
               "func_variable">::expect_int 22 "let p = func f -> f + 1 in p(21)";

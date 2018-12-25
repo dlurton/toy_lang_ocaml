@@ -1,6 +1,8 @@
 open Toy_lang.Types
 open Toy_lang.Core
 open Toy_lang.Env
+open Toy_lang.Rewrite
+open Toy_lang.Pretty
 
 open OUnit2;;
 
@@ -8,7 +10,16 @@ let test_parse (source: string) : expr_t =
   let presult = parse source in
   match presult with
   | PR_error(_, pmsg) -> assert_failure ("Parse error: " ^ pmsg)
-  | PR_success value -> value
+  | PR_success e ->
+    (* Include an additional assertion for default_rewrite here. This is a good
+       place since every test calls this function and as a result we will
+       also be testing default_rewrite_expr for free. *)
+    let e_copy = default_rewrite_expr e in
+    assert_equal e e_copy
+      ~msg: "Default rewiter must produce an exact copy of the original"
+      ~printer: pretty_string_of_expr;
+    e
+
 
 let test_eval (s: string) : value_t =
   let exp = test_parse s in

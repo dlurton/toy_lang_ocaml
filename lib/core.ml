@@ -66,7 +66,7 @@ let rec inner_eval (e: expr_t) (env: env_t) =
           let arg_value = inner_eval arg_exp env in
           let call_env = extend_env captured_env arg_name arg_value in
           inner_eval body_exp call_env
-        | _ -> raise (InterpExn(e.loc, ERR_invoked_non_func))
+       | _ -> raise (InterpExn(e.loc, ERR_invoked_non_func))
       end
 
 let eval e top_env : interp_result =

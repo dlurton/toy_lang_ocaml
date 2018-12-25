@@ -27,7 +27,7 @@ The original files for CS3110 can be downloaded
 - Variables (`let`)
 - Operators: `+`, `-`, `*`, `/`, `%`, `=`
 - Functions & closures
-- Recursion
+- Recursion (`let rec`)
 - A REPL
 
 ### Examples

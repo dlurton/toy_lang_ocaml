@@ -39,7 +39,7 @@ and value_t =
   | VAL_bool of bool
   | VAL_i32 of int
   | VAL_func of string * expr_t * env_t
-  | VAL_delayed_val of (unit -> value_t)
+  | VAL_ref of (value_t ref)
 (* An environment is, for now, simply a list of value_t *)
 and env_t = value_t list
 (* The AST. *)

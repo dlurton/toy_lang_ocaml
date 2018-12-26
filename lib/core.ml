@@ -27,7 +27,7 @@ let rec inner_eval (e: expr_t) (env: env_t) : value_t =
       apply_env env index in
     begin
       match value with
-      | VAL_delayed_val fn -> fn ()
+      | VAL_ref r -> !r (* For now, automatically dereference. *)
       | x -> x
     end
   | EXPN_literal n -> n
@@ -71,15 +71,10 @@ let rec inner_eval (e: expr_t) (env: env_t) : value_t =
         let nested_env = extend_env env the_value in
         inner_eval body_exp nested_env
       else
-        (* using VAL_delayed_val is slow since it will cause value_exp to be
-           re-evaluated every time the variable is evaulated.  This feels like
-           an inelegant but effective solution to the "tying the knot" problem
-           introduced by `let rec`.  Also, this will only work as long as we
-           do not have any support for side-effects. *)
-        let nested_env = (ref empty_env) in
-        let value_getter = fun () -> inner_eval value_exp !nested_env in
-        nested_env := extend_env env (VAL_delayed_val(value_getter));
-          inner_eval body_exp !nested_env
+        let future_val = ref (VAL_i32(0)) in (* provide a dummy value  *)
+        let nested_env = extend_env env (VAL_ref(future_val)) in
+        future_val := inner_eval value_exp nested_env;
+        inner_eval body_exp nested_env
     | EXPN_func(id, body_exp) -> VAL_func(id, body_exp, env)
     | EXPN_call(func_exp, arg_exp) ->
       let proc_val = inner_eval func_exp env in
@@ -104,10 +99,9 @@ let eval e top_env : interp_result =
 let eval_with_empty_env e =
   eval e empty_env
 
-(*
-   Uses the Menhir generated parser to turn a string into an AST.
-   Note: error handling is described here: https://v1.realworldocaml.org/v1/en/html/parsing-with-ocamllex-and-menhir.html
-*)
+(* Uses the Menhir generated parser to turn a string into an AST.
+   Note: error handling is described here:
+   https://v1.realworldocaml.org/v1/en/html/parsing-with-ocamllex-and-menhir.html *)
 let parse s =
   let lexbuf = Lexing.from_string(s) in
   try

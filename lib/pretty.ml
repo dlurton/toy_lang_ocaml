@@ -29,7 +29,7 @@ let rec pretty_string_of_expr e =
   | EXPN_let(name, recursive, value_exp, body_exp) ->
     let value_str = pretty_string_of_expr value_exp in
     let body_str = pretty_string_of_expr body_exp in
-    let rec_str = if recursive then "rec " else "" in 
+    let rec_str = if recursive then "rec " else "" in
     sprintf "let %s%s = %s in %s" rec_str name value_str body_str
   | EXPN_call(proc_exp, arg_exp) ->
     let proc_str = pretty_string_of_expr proc_exp in
@@ -44,4 +44,5 @@ and pretty_string_of_value = function
   | VAL_func(arg_name, body_exp, _) ->
     let body_str = pretty_string_of_expr body_exp in
     sprintf "func_value %s -> %s" arg_name body_str
-  | VAL_delayed_val _ -> "(*delayed value*)"
+  | VAL_ref r ->
+    sprintf "(ref %s)" (pretty_string_of_value !r)

@@ -51,11 +51,7 @@ let resolve_rewrite (expr: expr_t) : expr_t =
           (* the new static environment defined by the let *)
           let let_senv = extend_senv id senv in
           (* the static environment of the value expression *)
-          let senv_for_value = if not recursive then
-              senv
-            else
-              let_senv
-          in
+          let senv_for_value = if not recursive then senv else let_senv in
           (* the static environment of the body *)
           let senv_for_body = extend_senv id senv_for_value in
           EXPN_let(

@@ -61,9 +61,10 @@ expr:
   | LPAREN; e = expr; RPAREN { e }
 
   (* binary expressions
-     Note the odd use of (op; $startpos(op))--this is needed because
-     Menhir generates a variable which is unused which generates a
-     compiler warning which dune forces to be an error. :(   *)
+     Note the odd use of (op; $startpos(op))--this is needed instead of
+     simply $(startpos(op)) because Menhir generates an unused variable
+     which generates a compiler warning which dune forces to be an
+     error. :(   *)
   | e1 = expr; op = ADD; e2 = expr
     { make_node (EXPN_binary(OP_add, e1, e2)) (op; $startpos(op)) }
   | e1 = expr; op = SUB; e2 = expr

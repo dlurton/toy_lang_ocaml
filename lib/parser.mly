@@ -80,9 +80,9 @@ expr:
 
   (* let & let rec expressions *)
   | LET; id = ID; EQUALS; value_exp = expr; IN; body_exp = expr
-    { make_node (EXPN_let (id, value_exp, body_exp)) $startpos }
+    { make_node (EXPN_let (id, false, value_exp, body_exp)) $startpos }
   | LET; REC; id = ID; EQUALS; value_exp = expr; IN; body_exp = expr
-    { make_node (EXPN_let_rec (id, value_exp, body_exp)) $startpos }
+    { make_node (EXPN_let (id, true, value_exp, body_exp)) $startpos }
 
   (* function constructor expression *)
   | FUNC; var_name = ID; ARROW; body = expr;

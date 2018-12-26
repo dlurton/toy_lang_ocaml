@@ -49,14 +49,15 @@ let rec inner_eval (e: expr_t) (env: env_t) =
         | VAL_bool(false) -> inner_eval else_exp env
         | _ -> raise (InterpExn(cond_exp.loc, ERR_if_cond_not_bool))
       end
-    | EXPN_let(id, value_exp, body_exp ) ->
-      let the_value = inner_eval value_exp env in
-      let nested_env = extend_env env id the_value in
-      inner_eval body_exp nested_env
-    | EXPN_let_rec(id, value_exp, body_exp) ->
-      let value_getter = fun nested_env -> inner_eval value_exp nested_env in
-      let nested_env = extend_env_rec env id value_getter in
-      inner_eval body_exp nested_env
+    | EXPN_let(id, recursive, value_exp, body_exp ) ->
+      if not recursive then
+        let the_value = inner_eval value_exp env in
+        let nested_env = extend_env env id the_value in
+        inner_eval body_exp nested_env
+      else 
+        let value_getter = fun nested_env -> inner_eval value_exp nested_env in
+        let nested_env = extend_env_rec env id value_getter in
+        inner_eval body_exp nested_env
     | EXPN_func(id, body_exp) -> VAL_func(id, body_exp, env)
     | EXPN_call(func_exp, arg_exp) ->
       let proc_val = inner_eval func_exp env in

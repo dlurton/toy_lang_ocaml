@@ -24,11 +24,14 @@ let interpret_line line_text =
   | PR_error(sloc, pmsg) -> show_error sloc pmsg
   | PR_success e ->
     (* attempt to interpret the AST *)
+    Printf.printf "AST         : %s\n" (pretty_string_of_expr e);
+    Printf.printf "Resolved AST: %s\n" (e |> Toy_lang.Resolve.resolve_rewrite |> pretty_string_of_expr);
     let iresult = eval_with_empty_env e in
     match iresult with
     | IR_error(sloc, err) -> show_error sloc (string_of_error err)
     | IR_success value ->
-      print_endline(pretty_string_of_value(value))
+      Printf.printf "Value       : %s\n" (pretty_string_of_value(value));
+      flush stdout
 
 let () =
   let history_file = String.concat "" [(Unix.getenv "HOME"); "/.toy_lang.history"] in

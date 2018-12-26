@@ -1,15 +1,13 @@
 open Toy_lang.Types
 open Toy_lang.Core
-open Toy_lang.Env
 
 open OUnit2;;
 
 let test_parse (source: string) : expr_t =
-  let presult = parse source in
+  let presult = (parse source) in
   match presult with
   | PR_error(_, pmsg) -> assert_failure ("Parse error: " ^ pmsg)
-  | PR_success e -> e
-
+  | PR_success e -> e 
 
 let test_eval (s: string) : value_t =
   let exp = test_parse s in

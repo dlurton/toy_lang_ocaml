@@ -4,8 +4,8 @@ open Printf
 let rec pretty_string_of_expr e =
   let sprintf = Printf.sprintf in
   match e.exp with
-  | EXPN_var v ->
-    sprintf "%s" v
+  | EXPN_var v -> sprintf "%s" v
+  | EXPN_index i -> sprintf "|%d|" i
   | EXPN_literal n ->
     let value_str = pretty_string_of_value n in
     sprintf "%s" value_str
@@ -30,18 +30,18 @@ let rec pretty_string_of_expr e =
     let value_str = pretty_string_of_expr value_exp in
     let body_str = pretty_string_of_expr body_exp in
     let rec_str = if recursive then "rec " else "" in 
-    sprintf "\nlet %s%s = %s in %s" name rec_str value_str body_str
+    sprintf "let %s%s = %s in %s" rec_str name value_str body_str
   | EXPN_call(proc_exp, arg_exp) ->
     let proc_str = pretty_string_of_expr proc_exp in
     let body_str = pretty_string_of_expr arg_exp in
     sprintf "%s(%s)" proc_str body_str
   | EXPN_func(arg_name, body_exp) ->
     let body_str = pretty_string_of_expr body_exp in
-    sprintf "func(%s) %s" arg_name body_str
+    sprintf "func %s -> %s" arg_name body_str
 and pretty_string_of_value = function
   | VAL_bool b -> string_of_bool b
   | VAL_i32 i -> string_of_int i
   | VAL_func(arg_name, body_exp, _) ->
     let body_str = pretty_string_of_expr body_exp in
-    sprintf "proc(%s) %s" arg_name body_str
-
+    sprintf "func_value %s -> %s" arg_name body_str
+  | VAL_delayed_val _ -> "(*delayed value*)"

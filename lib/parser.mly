@@ -60,19 +60,22 @@ expr:
   (* precedence override *)
   | LPAREN; e = expr; RPAREN { e }
 
-  (* binary expressions *)
-  | e1 = expr; ADD; e2 = expr
-    { make_node (EXPN_binary(OP_add, e1, e2)) $startpos }
-  | e1 = expr; SUB; e2 = expr
-    { make_node (EXPN_binary(OP_sub, e1, e2)) $startpos }
-  | e1 = expr; MUL; e2 = expr
-    { make_node (EXPN_binary(OP_mul, e1, e2)) $startpos }
-  | e1 = expr; DIV; e2 = expr
-    { make_node (EXPN_binary(OP_div, e1, e2)) $startpos }
-  | e1 = expr; MOD; e2 = expr
-    { make_node (EXPN_binary(OP_mod, e1, e2)) $startpos }
-  | e1 = expr; EQUALS; e2 = expr
-    { make_node (EXPN_binary(OP_equals, e1, e2)) $startpos }
+  (* binary expressions
+     Note the odd use of (op; $startpos(op))--this is needed because
+     Menhir generates a variable which is unused which generates a
+     compiler warning which dune forces to be an error. :(   *)
+  | e1 = expr; op = ADD; e2 = expr
+    { make_node (EXPN_binary(OP_add, e1, e2)) (op; $startpos(op)) }
+  | e1 = expr; op = SUB; e2 = expr
+    { make_node (EXPN_binary(OP_sub, e1, e2)) (op; $startpos(op)) }
+  | e1 = expr; op = MUL; e2 = expr
+    { make_node (EXPN_binary(OP_mul, e1, e2)) (op; $startpos(op)) }
+  | e1 = expr; op = DIV; e2 = expr
+    { make_node (EXPN_binary(OP_div, e1, e2)) (op; $startpos(op)) }
+  | e1 = expr; op = MOD; e2 = expr
+    { make_node (EXPN_binary(OP_mod, e1, e2)) (op; $startpos(op)) }
+  | e1 = expr; op = EQUALS; e2 = expr
+    { make_node (EXPN_binary(OP_equals, e1, e2)) (op; $startpos(op)) }
 
   (* if expression *)
   | IF; cond_exp = expr; THEN; then_exp = expr; ELSE; else_exp = expr;

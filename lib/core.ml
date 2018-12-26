@@ -1,47 +1,63 @@
 open Types
-open Env
+
+(*TODO: update docs *)
+let empty_env : env_t = []
+let extend_env env value : env_t = value :: env
+
+let apply_env env index = (List.nth env index)
+
+let dump_env env =
+  let rec inner_dump_env ienv idepth =
+    match ienv with
+    | [] -> ()
+    | _ -> Printf.printf "%d: %s\n" idepth (List.hd ienv |> Pretty.pretty_string_of_value);
+    inner_dump_env (List.tl ienv) (idepth + 1)
+  in
+  print_string "Environment Dump:\n";
+  inner_dump_env env 0;
+  flush stdout
+
 
 (* Evaluates the parsed expression with the specified top-level environment. *)
-let rec inner_eval (e: expr_t) (env: env_t) =
-    match e.exp with
-    | EXPN_var id ->
+let rec inner_eval (e: expr_t) (env: env_t) : value_t =
+  match e.exp with
+  | EXPN_var id -> failwith ("Variable '" ^ id ^ "' still existed for some reason")
+  | EXPN_index index ->
+    let value =
+      apply_env env index in
+    begin
+      match value with
+      | VAL_delayed_val fn -> fn ()
+      | x -> x
+    end
+  | EXPN_literal n -> n
+  | EXPN_binary(op, left, right) ->
+    let values = ((inner_eval left env), (inner_eval right env)) in
+    let binary_int_op (func: int * int -> int) =
       begin
-        let value = env id in
-        match value with
-        | None -> raise (InterpExn(e.loc, ERR_unbound_var(id)))
-        | Some v -> v
-      end
-    | EXPN_literal n -> n
-    | EXPN_binary(op, left, right) ->
-      begin
-        let values = ((inner_eval left env), (inner_eval right env)) in
-        let binary_int_op (func: int * int -> int) =
-          begin
-            match values with
-            (* we have integers on both sides -- perform addition *)
-            | (VAL_i32 lval, VAL_i32 rval) -> VAL_i32(func(lval, rval))
-            (* non-integer on right side, use location of right hand expression *)
-            | (VAL_i32 _, _) -> raise (InterpExn(right.loc, ERR_arithmetic_on_non_number))
-            (* non-integer on left side, use location of left hand expression *)
-            | (_, VAL_i32 _) -> raise (InterpExn(left.loc, ERR_arithmetic_on_non_number))
-            (* non-integer on both sides, location of `e` *)
-            | (_, _) -> raise (InterpExn(e.loc, ERR_arithmetic_on_non_number))
-          end in
-        match op with
-        | OP_equals ->
-          begin
-            match values with
-            | (VAL_i32 lval, VAL_i32 rval) -> VAL_bool(lval = rval)
-            | (VAL_bool lval, VAL_bool rval) -> VAL_bool(lval = rval)
-            | (_, _) -> VAL_bool(false)
-          end
-        | OP_add -> binary_int_op (fun (l, r) -> l + r)
-        | OP_sub -> binary_int_op (fun (l, r) -> l - r)
-        | OP_mul -> binary_int_op (fun (l, r) -> l * r)
-        | OP_div -> binary_int_op (fun (l, r) -> l / r)
-        | OP_mod -> binary_int_op (fun (l, r) -> l mod r)
-      end
-    | EXPN_if(cond_exp, then_exp, else_exp) ->
+        match values with
+        (* we have integers on both sides -- perform addition *)
+        | (VAL_i32 lval, VAL_i32 rval) -> VAL_i32(func(lval, rval))
+        | _ ->
+            (* we have a non-integer somewhere *) 
+            raise (InterpExn(e.loc, ERR_arithmetic_on_non_number))
+      end in
+    begin
+      match op with
+      | OP_equals ->
+        begin
+          match values with
+          | (VAL_i32 lval, VAL_i32 rval) -> VAL_bool(lval = rval)
+          | (VAL_bool lval, VAL_bool rval) -> VAL_bool(lval = rval)
+          | (_, _) -> VAL_bool(false)
+        end
+      | OP_add -> binary_int_op (fun (l, r) -> l + r)
+      | OP_sub -> binary_int_op (fun (l, r) -> l - r)
+      | OP_mul -> binary_int_op (fun (l, r) -> l * r)
+      | OP_div -> binary_int_op (fun (l, r) -> l / r)
+      | OP_mod -> binary_int_op (fun (l, r) -> l mod r)
+    end
+  | EXPN_if(cond_exp, then_exp, else_exp) ->
       let cond_val = inner_eval cond_exp env in
       begin
         match cond_val with
@@ -49,29 +65,38 @@ let rec inner_eval (e: expr_t) (env: env_t) =
         | VAL_bool(false) -> inner_eval else_exp env
         | _ -> raise (InterpExn(cond_exp.loc, ERR_if_cond_not_bool))
       end
-    | EXPN_let(id, recursive, value_exp, body_exp ) ->
+    | EXPN_let(_, recursive, value_exp, body_exp ) ->
       if not recursive then
         let the_value = inner_eval value_exp env in
-        let nested_env = extend_env env id the_value in
+        let nested_env = extend_env env the_value in
         inner_eval body_exp nested_env
-      else 
-        let value_getter = fun nested_env -> inner_eval value_exp nested_env in
-        let nested_env = extend_env_rec env id value_getter in
-        inner_eval body_exp nested_env
+      else
+        (* using VAL_delayed_val is slow since it will cause value_exp to be
+           re-evaluated every time the variable is evaulated.  This feels like
+           an inelegant but effective solution to the "tying the knot" problem
+           introduced by `let rec`.  Also, this will only work as long as we
+           do not have any support for side-effects. *)
+        let nested_env = (ref empty_env) in
+        let value_getter = fun () -> inner_eval value_exp !nested_env in
+        nested_env := extend_env env (VAL_delayed_val(value_getter));
+          inner_eval body_exp !nested_env
     | EXPN_func(id, body_exp) -> VAL_func(id, body_exp, env)
     | EXPN_call(func_exp, arg_exp) ->
       let proc_val = inner_eval func_exp env in
       begin
         match proc_val with
-        | VAL_func(arg_name, body_exp, captured_env) ->
+        | VAL_func(_, body_exp, captured_env) ->
           let arg_value = inner_eval arg_exp env in
-          let call_env = extend_env captured_env arg_name arg_value in
+          let call_env = extend_env captured_env arg_value in
           inner_eval body_exp call_env
-       | _ -> raise (InterpExn(e.loc, ERR_invoked_non_func))
+        | _ -> raise (InterpExn(e.loc, ERR_invoked_non_func))
       end
 
 let eval e top_env : interp_result =
-  try IR_success(inner_eval e top_env)
+  try
+    let resolved_exp = e |> Resolve.resolve_rewrite in
+    (*Printf.printf "\n****\n%s\n***" (Pretty.pretty_string_of_expr resolved_exp);*)
+      IR_success(inner_eval resolved_exp top_env)
   with InterpExn (loc, msg) ->
     IR_error(loc, msg)
 

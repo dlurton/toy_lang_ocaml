@@ -108,9 +108,9 @@ let suite = "toy_lang_suite" >:::
               "binary_order_of_operations_7">::expect_int 4 "14 * 2 % 10 / 2"; (* % same as * and / *)
 
               (* arithmetic errors *)
-              "binary_add_int_bool">::expect_error 1 5 ERR_arithmetic_on_non_number "1 + true";
-              "binary_add_bool_int">::expect_error 1 2 ERR_arithmetic_on_non_number " true + 1";
-              "binary_add_bool_bool">::expect_error 1 2 ERR_arithmetic_on_non_number " true + true";
+              "binary_add_int_bool">::expect_error 1 3 ERR_arithmetic_on_non_number "1 + true";
+              "binary_add_bool_int">::expect_error 1 6 ERR_arithmetic_on_non_number "true + 1";
+              "binary_add_bool_bool">::expect_error 1 6 ERR_arithmetic_on_non_number "true + true";
 
               (* if *)
               "if_1">::expect_int 1 "if true then 1 else 2";

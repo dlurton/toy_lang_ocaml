@@ -1,6 +1,7 @@
 open Toy_lang.Types
 open Toy_lang.Core
-
+open Toy_lang.Rewrite
+open Toy_lang.Pretty
 open OUnit2;;
 
 let test_parse (source: string) : expr_t =
@@ -11,6 +12,11 @@ let test_parse (source: string) : expr_t =
 
 let test_eval (s: string) : value_t =
   let exp = test_parse s in
+  (* We are throwing in an additional rewrite pass here to ensure that the default_rewrite
+     produces an exact clone of its original. *)
+  let new_exp = default_rewrite exp in
+  assert_bool "default_rewrite must return a new instance" (exp != new_exp);
+  assert_equal exp new_exp ~printer:pretty_string_of_expr;
   let iresult = eval_with_empty_env exp in
   match iresult with
   | IR_error (_, err) -> assert_failure ("Interp error: " ^ (string_of_error err))

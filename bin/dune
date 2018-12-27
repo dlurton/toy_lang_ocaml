@@ -1,6 +1,7 @@
-(executables
-    (names repl)
-    (libraries linenoise toy_lang unix))
+(executable
+    (name repl)
+    (libraries toy_lang linenoise unix)
+    (modes (byte exe)))
 
 (install
     (section bin)

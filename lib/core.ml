@@ -1,21 +1,28 @@
 open Types
 
 (*TODO: update docs *)
-let empty_env : env_t = []
-let extend_env env value : env_t = value :: env
-
-let apply_env env env_index var_index = (List.nth env env_index).(var_index)
-
 let dump_env env =
   let rec inner_dump_env ienv idepth =
     match ienv with
     | [] -> ()
-    | _ -> Printf.printf "%d: %s\n" idepth (List.hd ienv |> Pretty.pretty_string_of_value);
-    inner_dump_env (List.tl ienv) (idepth + 1)
+    | hd::tl ->
+      Printf.printf "%d: %s\n"
+        idepth
+        (String.concat " " (hd |> Array.map (fun i -> Pretty.pretty_string_of_value i) |> Array.to_list));
+    inner_dump_env tl (idepth + 1)
   in
-  print_string "Environment Dump:\n";
+  print_string "Environment dump:\n";
   inner_dump_env env 0;
   flush stdout
+
+let empty_env : env_t = []
+let extend_env env value : env_t = value :: env
+
+let apply_env env env_index var_index =
+  (match List.nth_opt  env env_index with
+   | None -> failwith (Printf.sprintf "env_index %d does not exist" env_index)
+   | Some vars -> vars
+  ).(var_index)
 
 (* Evaluates the parsed expression with the specified top-level environment. *)
 let rec inner_eval (e: expr_t) (env: env_t) : value_t =
@@ -23,6 +30,7 @@ let rec inner_eval (e: expr_t) (env: env_t) : value_t =
   | EXPN_var id -> failwith ("Variable '" ^ id ^ "' still existed for some reason")
   | EXPN_index (env_index, var_index) ->
     let value =
+      dump_env env;
       apply_env env env_index var_index in
     begin
       match value with

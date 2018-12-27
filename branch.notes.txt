@@ -1,0 +1,5 @@
+  The simplified form of the expression causing you pain is:
+  let f = func factor -> let rec sum = func n -> if n = 0 then 0 else 10 + sum(n - 1) in sum(factor) in f(10)
+There is a more complex version of this (with multiple arguments) in the multiple_args branch, test.ml
+You'll want both of them.
+

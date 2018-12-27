@@ -1,5 +1,7 @@
 
-(library (public_name toy_lang))
+(library
+  (public_name toy_lang)
+  (modes byte native))
 
 (ocamllex lexer)
 

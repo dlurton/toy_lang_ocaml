@@ -133,8 +133,7 @@ let suite = "toy_lang_suite" >:::
               "let_shadow_2">::expect_int 102 "let x = 99 in let x = 101 in x + 1";
 
               (* let rec *)
-              "let_rec_factorial">::expect_int 40320
-                "let rec fact = func n -> if n = 0 then 1 else n * fact(n - 1) in fact(8)";
+              "let_rec_factorial">::expect_int 40320 "let rec fact = func n -> if n = 0 then 1 else n * fact(n - 1) in fact(8)";
 
               "let_rec_fib">::expect_int 34 {str|
 let rec fib =
@@ -146,10 +145,19 @@ let rec fib =
   in
     fib(8)
 |str};
-
+              "let_rec_nested">::expect_int 00 {str|
+let f =
+  func mutiple factor ->
+    let rec sum = func n ->
+      if n = 0 then 0 else mutiple + sum(n - 1)
+      in sum(factor)
+  in
+  f(5 10)
+|str};
               (* func *)
               "func_1">::expect_int 22 "(func f -> f + 1)(21)";
-              "func_2">::expect_int 32 "(func x y -> f + 1)(10 22)";
+              "func_2">::expect_int 32 "(func x y -> x + y)(10 22)";
+              "func_3">::expect_int 17 "(func x y z -> x + y * z)(3 2 5)";
               "func_variable">::expect_int 22 "let p = func f -> f + 1 in p(21)";
               "func_as_arg">::expect_int 22 "(func f -> f(21))(func x -> x + 1)";
               "func_returned">::expect_int 22 "(func x -> func y -> x + y)(10)(12)";

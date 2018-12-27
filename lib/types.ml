@@ -2,7 +2,6 @@
    This file contain the core data type definitions.
 *)
 
-
 (* The evaluation-time "ground" types. *)
 type src_loc_t = {
   file: string;
@@ -38,7 +37,7 @@ type op_t =
 and value_t =
   | VAL_bool of bool
   | VAL_i32 of int
-  | VAL_func of string * expr_t * env_t
+  | VAL_func of string list * expr_t * env_t
   | VAL_ref of (value_t ref)
 (* An environment is, for now, simply a list of value_t *)
 and env_t = value_t array list
@@ -54,8 +53,8 @@ and expr_node_t =
   | EXPN_binary   of op_t * expr_t * expr_t
   | EXPN_let      of string * bool * expr_t * expr_t
   | EXPN_if       of expr_t * expr_t * expr_t
-  | EXPN_func     of string * expr_t
-  | EXPN_call     of expr_t * expr_t
+  | EXPN_func     of string list * expr_t
+  | EXPN_call     of expr_t * (expr_t list)
 
 (* TODO: parse_result and interp_result really should have the _t suffix. *)
 (* The result of an attempt to parse a snippet of code. *)

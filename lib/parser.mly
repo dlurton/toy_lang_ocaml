@@ -54,8 +54,8 @@ expr:
   | x = ID { make_node (EXPN_var(x)) $startpos }
 
   (* function call *)
-  | proc_expr = expr; LPAREN; arg = expr; RPAREN;
-    { make_node (EXPN_call(proc_expr, arg)) $startpos }
+  | proc_expr = expr; LPAREN; args = list(expr); RPAREN;
+    { make_node (EXPN_call(proc_expr, args)) $startpos }
 
   (* precedence override *)
   | LPAREN; e = expr; RPAREN { e }
@@ -89,6 +89,6 @@ expr:
     { make_node (EXPN_let (id, true, value_exp, body_exp)) $startpos }
 
   (* function constructor expression *)
-  | FUNC; var_name = ID; ARROW; body = expr;
-    { make_node (EXPN_func(var_name, body)) $startpos }
+  | FUNC; param_names = list(ID); ARROW; body = expr;
+    { make_node (EXPN_func(param_names, body)) $startpos }
   ;

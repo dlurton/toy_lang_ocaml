@@ -6,8 +6,8 @@ type senv_t = string list list
 let empty_senv : senv_t = []
 
 (* Extend a static environment. *)
-let extend_senv id senv : senv_t =
-  [id] :: senv
+let extend_senv ids senv : senv_t =
+  ids :: senv
 
 let senv_lookup id top_senv =
   let rec search_senv senv env_index =
@@ -59,24 +59,24 @@ let resolve_rewrite (expr: expr_t) : expr_t =
           )
         | EXPN_let(id, recursive, value_exp, body_exp ) ->
           (* the new static environment defined by the let *)
-          let let_senv = extend_senv id senv in
+          let let_senv = extend_senv [id] senv in
           (* the static environment of the value expression *)
           let senv_for_value = if not recursive then senv else let_senv in
           (* the static environment of the body *)
-          let senv_for_body = extend_senv id senv_for_value in
+          let senv_for_body = extend_senv [id] senv_for_value in
           EXPN_let(
             id,
             recursive,
             (resolve_rewrite_expr value_exp senv_for_value),
             (resolve_rewrite_expr body_exp senv_for_body)
           )
-        | EXPN_func(arg_id, body_exp) -> EXPN_func(
-            arg_id,
-            extend_senv arg_id senv |> resolve_rewrite_expr body_exp
+        | EXPN_func(arg_ids, body_exp) -> EXPN_func(
+            arg_ids,
+            extend_senv arg_ids senv |> resolve_rewrite_expr body_exp
           )
-        | EXPN_call(func_exp, arg_exp) -> EXPN_call(
+        | EXPN_call(func_exp, arg_exps) -> EXPN_call(
             (resolve_rewrite_expr func_exp senv),
-            (resolve_rewrite_expr arg_exp senv)
+            (List.map (fun e -> resolve_rewrite_expr e senv) arg_exps)
           )
     }
   in resolve_rewrite_expr expr empty_senv

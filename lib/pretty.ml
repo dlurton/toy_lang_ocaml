@@ -5,7 +5,7 @@ let rec pretty_string_of_expr e =
   let sprintf = Printf.sprintf in
   match e.exp with
   | EXPN_var v -> sprintf "%s" v
-  | EXPN_index(i, j) -> sprintf "|%d %d|" i j
+  | EXPN_index(env_index, var_index) -> sprintf "|%d %d|" env_index var_index
   | EXPN_literal n ->
     let value_str = pretty_string_of_value n in
     sprintf "%s" value_str
@@ -31,18 +31,20 @@ let rec pretty_string_of_expr e =
     let body_str = pretty_string_of_expr body_exp in
     let rec_str = if recursive then "rec " else "" in
     sprintf "let %s%s = %s in %s" rec_str name value_str body_str
-  | EXPN_call(proc_exp, arg_exp) ->
-    let proc_str = pretty_string_of_expr proc_exp in
-    let body_str = pretty_string_of_expr arg_exp in
-    sprintf "%s(%s)" proc_str body_str
-  | EXPN_func(arg_name, body_exp) ->
-    let body_str = pretty_string_of_expr body_exp in
-    sprintf "func %s -> %s" arg_name body_str
+  | EXPN_call(func_exp, arg_exps) ->
+    sprintf "%s(%s)"
+      (pretty_string_of_expr func_exp)
+      (String.concat " " (List.map (fun e -> pretty_string_of_expr e) arg_exps))
+  | EXPN_func(arg_names, body_exp) ->
+    sprintf "func %s -> %s"
+      (String.concat " " arg_names)
+      (pretty_string_of_expr body_exp)
 and pretty_string_of_value = function
   | VAL_bool b -> string_of_bool b
   | VAL_i32 i -> string_of_int i
-  | VAL_func(arg_name, body_exp, _) ->
-    let body_str = pretty_string_of_expr body_exp in
-    sprintf "func_value %s -> %s" arg_name body_str
+  | VAL_func(arg_names, body_exp, _) ->
+    sprintf "func_value %s -> %s"
+      (String.concat " " arg_names)
+      (pretty_string_of_expr body_exp)
   | VAL_ref r ->
     sprintf "(ref %s)" (pretty_string_of_value !r)

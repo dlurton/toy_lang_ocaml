@@ -74,14 +74,16 @@ let rec inner_eval (e: expr_t) (env: env_t) : value_t =
         let nested_env = extend_env env [|(VAL_ref(future_val))|] in
         future_val := inner_eval value_exp nested_env;
         inner_eval body_exp nested_env
-    | EXPN_func(id, body_exp) -> VAL_func(id, body_exp, env)
-    | EXPN_call(func_exp, arg_exp) ->
+    | EXPN_func(ids, body_exp) -> VAL_func(ids, body_exp, env)
+    | EXPN_call(func_exp, arg_exps) ->
       let proc_val = inner_eval func_exp env in
       begin
         match proc_val with
         | VAL_func(_, body_exp, captured_env) ->
-          let arg_value = inner_eval arg_exp env in
-          let call_env = extend_env captured_env [|arg_value|] in
+          let arg_values = Array.of_list
+              (List.map (fun e -> inner_eval e env) arg_exps)
+          in
+          let call_env = extend_env captured_env arg_values in
           inner_eval body_exp call_env
         | _ -> raise (InterpExn(e.loc, ERR_invoked_non_func))
       end

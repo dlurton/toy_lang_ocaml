@@ -41,7 +41,7 @@ and value_t =
   | VAL_func of string * expr_t * env_t
   | VAL_ref of (value_t ref)
 (* An environment is, for now, simply a list of value_t *)
-and env_t = value_t list
+and env_t = value_t array list
 (* The AST. *)
 and expr_t = {
   exp : expr_node_t;
@@ -49,7 +49,7 @@ and expr_t = {
 }
 and expr_node_t =
   | EXPN_var      of string
-  | EXPN_index    of int
+  | EXPN_index    of int * int
   | EXPN_literal  of value_t
   | EXPN_binary   of op_t * expr_t * expr_t
   | EXPN_let      of string * bool * expr_t * expr_t

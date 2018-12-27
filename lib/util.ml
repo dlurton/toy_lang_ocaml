@@ -15,3 +15,15 @@ let make_node exp (start_loc: Lexing.position) =
   { exp = exp; loc = src_loc_of_position start_loc; }
 
 
+let find_first_index lst predicate =
+  let rec find lst index =
+    match lst with
+    | [] -> None
+    | hd::tl ->
+      if predicate(hd) then
+        Some(index)
+      else
+        find tl (index + 1)
+  in
+  find lst 0
+

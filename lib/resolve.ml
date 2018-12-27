@@ -1,22 +1,32 @@
 open Types
 
-type lexaddr_t
-type senv_t = string list
+type senv_t = string list list
 
 (* An empty static environment. *)
 let empty_senv : senv_t = []
 
 (* Extend a static environment. *)
 let extend_senv id senv : senv_t =
-  id :: senv
+  [id] :: senv
 
-let senv_lookup id senv =
-  let rec search_senv index next_senv =
-    if next_senv = [] then None
-    else if id = (List.hd next_senv) then Some(index)
-    else search_senv (index + 1)(List.tl next_senv)
+let senv_lookup id top_senv =
+  let rec search_senv senv env_index =
+    let rec search_vars vars var_index =
+      match vars with
+      | [] -> None (* variable not found in vars *)
+      | hd::tl -> if hd = id then Some(var_index) else search_vars tl (var_index + 1)
+    in
+    match senv with
+    | [] -> None  (* searched all the way to global scope, variable not found *)
+    | hd::tl ->
+      begin (* search the next senv *)
+        match search_vars hd 0 with
+        | Some(var_index) -> Some(env_index, var_index)
+        | None -> search_senv tl (env_index + 1)
+      end
   in
-    search_senv 0 senv
+  search_senv top_senv 0
+
 
 let resolve_rewrite (expr: expr_t) : expr_t =
   let rec resolve_rewrite_expr (e: expr_t) (senv: senv_t) =
@@ -34,7 +44,7 @@ let resolve_rewrite (expr: expr_t) : expr_t =
           begin
             match senv_lookup id senv with
             | None -> raise (InterpExn(e.loc, ERR_unbound_var(id)))
-            | Some index -> EXPN_index(index)
+            | Some (env_index, var_index) -> EXPN_index(env_index, var_index)
           end
         | EXPN_literal n -> EXPN_literal(n)
         | EXPN_binary(op, left, right) -> EXPN_binary(

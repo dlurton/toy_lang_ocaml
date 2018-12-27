@@ -4,7 +4,7 @@ open Types
 let empty_env : env_t = []
 let extend_env env value : env_t = value :: env
 
-let apply_env env index = (List.nth env index)
+let apply_env env env_index var_index = (List.nth env env_index).(var_index)
 
 let dump_env env =
   let rec inner_dump_env ienv idepth =
@@ -17,14 +17,13 @@ let dump_env env =
   inner_dump_env env 0;
   flush stdout
 
-
 (* Evaluates the parsed expression with the specified top-level environment. *)
 let rec inner_eval (e: expr_t) (env: env_t) : value_t =
   match e.exp with
   | EXPN_var id -> failwith ("Variable '" ^ id ^ "' still existed for some reason")
-  | EXPN_index index ->
+  | EXPN_index (env_index, var_index) ->
     let value =
-      apply_env env index in
+      apply_env env env_index var_index in
     begin
       match value with
       | VAL_ref r -> !r (* For now, automatically dereference. *)
@@ -39,7 +38,7 @@ let rec inner_eval (e: expr_t) (env: env_t) : value_t =
         (* we have integers on both sides -- perform addition *)
         | (VAL_i32 lval, VAL_i32 rval) -> VAL_i32(func(lval, rval))
         | _ ->
-            (* we have a non-integer somewhere *) 
+            (* we have a non-integer somewhere *)
             raise (InterpExn(e.loc, ERR_arithmetic_on_non_number))
       end in
     begin
@@ -68,11 +67,11 @@ let rec inner_eval (e: expr_t) (env: env_t) : value_t =
     | EXPN_let(_, recursive, value_exp, body_exp ) ->
       if not recursive then
         let the_value = inner_eval value_exp env in
-        let nested_env = extend_env env the_value in
+        let nested_env = extend_env env [|the_value|] in
         inner_eval body_exp nested_env
       else
-        let future_val = ref (VAL_i32(0)) in (* provide a dummy value  *)
-        let nested_env = extend_env env (VAL_ref(future_val)) in
+        let future_val = ref (VAL_i32(0)) in (* provide a dummy value *)
+        let nested_env = extend_env env [|(VAL_ref(future_val))|] in
         future_val := inner_eval value_exp nested_env;
         inner_eval body_exp nested_env
     | EXPN_func(id, body_exp) -> VAL_func(id, body_exp, env)
@@ -82,7 +81,7 @@ let rec inner_eval (e: expr_t) (env: env_t) : value_t =
         match proc_val with
         | VAL_func(_, body_exp, captured_env) ->
           let arg_value = inner_eval arg_exp env in
-          let call_env = extend_env captured_env arg_value in
+          let call_env = extend_env captured_env [|arg_value|] in
           inner_eval body_exp call_env
         | _ -> raise (InterpExn(e.loc, ERR_invoked_non_func))
       end

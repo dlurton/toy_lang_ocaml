@@ -106,6 +106,7 @@ Then, you can examine the file `lib/parser.conflicts` to read about the first sh
 - [OCaml Cheat Sheets](https://ocaml.org/docs/cheat_sheets.html)
 - [OCaml Stack Overflow](https://stackoverflow.com/questions/tagged/ocaml)
 - [OUnit Documentation](http://ounit.forge.ocamlcore.org/api-ounit/index.html)
+- [Parsing with ocamllex and Menhir](https://v1.realworldocaml.org/v1/en/html/parsing-with-ocamllex-and-menhir.html) (Real World OCaml)
 - [Menhir reference manual](http://gallium.inria.fr/~fpottier/menhir/manual.pdf)
 - [Lexing module documentation](https://caml.inria.fr/pub/docs/manual-ocaml/libref/Lexing.html)
 - [opam packaging](https://opam.ocaml.org/doc/Packaging.html) (Describies files like `toy_lang.opam`)

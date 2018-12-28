@@ -26,8 +26,10 @@ let apply_env env env_index var_index =
    | Some vars -> vars
   ).(var_index)
 
+
 (* Evaluates the parsed expression with the specified top-level environment. *)
-let rec inner_eval (e: expr_t) (env: env_t) : value_t =
+let eval e top_env : interp_result =
+  let rec inner_eval (e: expr_t) (env: env_t) : value_t =
   match e.exp with
   | EXPN_var id -> failwith ("Variable '" ^ id ^ "' still existed for some reason")
   | EXPN_index (env_index, var_index) ->
@@ -105,11 +107,10 @@ let rec inner_eval (e: expr_t) (env: env_t) : value_t =
             inner_eval body_exp call_env
         | _ -> raise (InterpExn(e.loc, ERR_invoked_non_func))
       end
-
-let eval e top_env : interp_result =
+  in
   try
     let resolved_exp = e |> Resolve.resolve_rewrite in
-      IR_success(inner_eval resolved_exp top_env)
+    IR_success(inner_eval resolved_exp top_env)
   with InterpExn (loc, msg) ->
     IR_error(loc, msg)
 
@@ -117,9 +118,7 @@ let eval e top_env : interp_result =
 let eval_with_empty_env e =
   eval e empty_env
 
-(* Uses the Menhir generated parser to turn a string into an AST.
-   Note: error handling is described here:
-   https://v1.realworldocaml.org/v1/en/html/parsing-with-ocamllex-and-menhir.html *)
+(* Uses the Menhir generated parser to turn a string into an AST. *)
 let parse s =
   let lexbuf = Lexing.from_string(s) in
   try
@@ -128,6 +127,7 @@ let parse s =
   with LexicalExn(src_loc, msg) ->
     PR_error(src_loc, "Lexical error: " ^ msg)
     | Parser.Error ->
-       PR_error(make_src_loc "TODO" 1 1, "Syntax error")
+      let sloc = Util.src_loc_of_position lexbuf.lex_curr_p in 
+       PR_error(sloc, "Syntax error near this position")
 
 

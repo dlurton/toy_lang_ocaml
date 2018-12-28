@@ -167,7 +167,11 @@ let f =
   f(5, 10)
 ";
 
-              "let_rec_factorial">::expect_int 40320 "let rec fact = func n -> if n = 0 then 1 else n * fact(n - 1) in fact(8)";
+              "let_rec_factorial">::expect_int 40320 "
+let rec fact = func n ->
+  if n = 0 then 1 else n * fact(n - 1)
+in fact(8)
+";
 
               "let_rec_fib">::expect_int 34 "
 let rec fib =

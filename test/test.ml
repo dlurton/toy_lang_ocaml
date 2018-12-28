@@ -133,10 +133,26 @@ let suite = "toy_lang_suite" >:::
               "let_shadow_2">::expect_int 102 "let x = 99 in let x = 101 in x + 1";
 
               (* let rec *)
-              "let_rec_factorial">::expect_int 40320
-                "let rec fact = func n -> if n = 0 then 1 else n * fact(n - 1) in fact(8)";
+              "let_rec_nested_func">::expect_int 100 "
+let f = func factor ->
+  let rec sum = func n ->
+    if n = 0 then 0 else 10 + sum(n - 1)
+  in sum(factor)
+in f(10)
+";
+              "let_rec_nested_func_2">::expect_int 50 "
+let f =
+  func mutiple factor ->
+    let rec sum = func n ->
+      if n = 0 then 0 else mutiple + sum(n - 1)
+      in sum(factor)
+  in
+  f(5, 10)
+";
 
-              "let_rec_fib">::expect_int 34 {str|
+              "let_rec_factorial">::expect_int 40320 "let rec fact = func n -> if n = 0 then 1 else n * fact(n - 1) in fact(8)";
+
+              "let_rec_fib">::expect_int 34 "
 let rec fib =
   func n ->
     // TODO:  when <= is added, change this nested if else to if n <= 1
@@ -145,17 +161,32 @@ let rec fib =
     else fib(n - 1) + fib(n - 2)
   in
     fib(8)
-|str};
-
+";
               (* func *)
-              "func_1">::expect_int 22 "(func f -> f + 1 )(21)";
+              "func_zero_arg">::expect_int 11 "(func -> 11)()";
+              "func_single_arg">::expect_int 1 "(func x -> x)(1)";
+              "func_two_args_1">::expect_int 1 "(func x y -> x)(1, 2)";
+              "func_two_args_2">::expect_int 2 "(func x y -> y)(1, 2)";
+              "func_three_args_1">::expect_int 1 "(func x y z -> x)(1, 2, 3)";
+              "func_three_args_2">::expect_int 2 "(func x y z -> y)(1, 2, 3)";
+              "func_three_args_3">::expect_int 3 "(func x y z -> z)(1, 2, 3)";
+              "func_with_exp_1">::expect_int 22 "(func f -> f + 1)(21)";
+              "func_with_exp_2">::expect_int 32 "(func x y -> x + y)(10 ,22)";
+              "func_with_exp_3">::expect_int 13 "(func x y z -> x + y * z)(3, 2, 5)";
+              "func_dup_arg_names">::expect_int 3 "(func x x -> x)(3, 2)";
               "func_variable">::expect_int 22 "let p = func f -> f + 1 in p(21)";
               "func_as_arg">::expect_int 22 "(func f -> f(21))(func x -> x + 1)";
               "func_returned">::expect_int 22 "(func x -> func y -> x + y)(10)(12)";
               "func_in_let">::expect_int 22 "let f = func x -> func y -> x + y in f(10)(12)";
 
               (* func errors *)
-              "func_call_non_func">::expect_error 1 1 ERR_invoked_non_func "1(1)";
+              "func_call_non_func">::expect_error 1 2 ERR_invoked_non_func "1(1)";
+              "func_call_wrong_num_args_0_1">::expect_error
+                1 12 (ERR_incorrect_arg_count(0, 1)) "(func -> 1)(1)";
+              "func_call_wrong_num_args_2_0">::expect_error
+                1 16 (ERR_incorrect_arg_count(2, 0)) "(func x y -> 1)()";
+              "func_call_wrong_num_args_2_3">::expect_error
+                1 16 (ERR_incorrect_arg_count(2, 3)) "(func x y -> 1)(1, 2, 3)";
 
               (* the y-combinator, just because *)
               (* TODO, here's an example: https://rosettacode.org/wiki/Y_combinator#OCaml *)

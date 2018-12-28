@@ -11,7 +11,7 @@ let rewrite outer_e (outer_ctx: 'cx) (custom_rewrite: 'cx custom_rewriter_t) =
             exp =
               match e.exp with
               | EXPN_var id -> EXPN_var(id)
-              | EXPN_index i -> EXPN_index(i)
+              | EXPN_index (i, j) -> EXPN_index(i, j)
               | EXPN_literal n -> EXPN_literal(n)
               | EXPN_binary(op, left, right) -> EXPN_binary(
                   op,
@@ -34,9 +34,9 @@ let rewrite outer_e (outer_ctx: 'cx) (custom_rewrite: 'cx custom_rewriter_t) =
                   arg_id,
                   (inner_rewrite body_exp ctx)
                 )
-              | EXPN_call(func_exp, arg_exp) -> EXPN_call(
+              | EXPN_call(func_exp, arg_exps) -> EXPN_call(
                   (inner_rewrite func_exp ctx),
-                  (inner_rewrite arg_exp ctx)
+                  arg_exps |> List.map (fun e -> inner_rewrite e ctx)
                 )
           }
   in

@@ -18,6 +18,7 @@ It looked something like: `%token LET "let"`
 %token FUNC
 %token IN ARROW
 %token EOF
+%token COMMA
 
 (****
   The order of tokens listed here specifies their precedence.
@@ -44,6 +45,10 @@ prog:
 	;
 
 expr:
+ (* Note the odd use of (op; $startpos(op))--this is needed instead of
+     simply $(startpos(op)) because Menhir generates an unused variable
+     which generates a compiler warning which dune forces to be an
+     error. *)
 
   (* literals *)
   | TRUE     { make_node (EXPN_literal(VAL_bool(true))) $startpos}
@@ -54,17 +59,13 @@ expr:
   | x = ID { make_node (EXPN_var(x)) $startpos }
 
   (* function call *)
-  | proc_expr = expr; LPAREN; arg = expr; RPAREN;
-    { make_node (EXPN_call(proc_expr, arg)) $startpos }
+  | proc_expr = expr; lp = LPAREN; args = separated_list(COMMA, expr); RPAREN;
+    { make_node (EXPN_call(proc_expr, args)) (lp; $startpos(lp)) }
 
   (* precedence override *)
   | LPAREN; e = expr; RPAREN { e }
 
-  (* binary expressions
-     Note the odd use of (op; $startpos(op))--this is needed instead of
-     simply $(startpos(op)) because Menhir generates an unused variable
-     which generates a compiler warning which dune forces to be an
-     error. :(   *)
+  (* binary expressions *)
   | e1 = expr; op = ADD; e2 = expr
     { make_node (EXPN_binary(OP_add, e1, e2)) (op; $startpos(op)) }
   | e1 = expr; op = SUB; e2 = expr
@@ -89,6 +90,6 @@ expr:
     { make_node (EXPN_let (id, true, value_exp, body_exp)) $startpos }
 
   (* function constructor expression *)
-  | FUNC; var_name = ID; ARROW; body = expr;
-    { make_node (EXPN_func(var_name, body)) $startpos }
+  | FUNC; param_names = list(ID); ARROW; body = expr;
+    { make_node (EXPN_func(param_names, body)) $startpos }
   ;

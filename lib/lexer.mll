@@ -30,6 +30,7 @@ rule read =
   | white               { read lexbuf }
   | single_line_comment { read lexbuf }
   | multi_line_comment  { read lexbuf }
+  | ","                 { COMMA }
   | "+"                 { ADD }
   | "-"                 { SUB }
   | "*"                 { MUL }

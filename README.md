@@ -87,7 +87,6 @@ OCAML toy language REPL - type "?exit" to exit
 
 - Comparison operators: `>`, `>=`, `<`, `<=`
 - Logical operators: `&&`, `||` and `^^`
-- Add support for functions with multiple arguments 
 - A foreign function interface to OCaml
 - Add the language features of your choice.
 

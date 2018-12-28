@@ -32,6 +32,10 @@ type op_t =
   | OP_div
   | OP_mod
   | OP_equals
+  | OP_gt
+  | OP_gte
+  | OP_lt
+  | OP_lte
 
 (* The types of the language. *)
 and value_t =

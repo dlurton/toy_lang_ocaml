@@ -11,12 +11,16 @@ let rec pretty_string_of_expr e =
     sprintf "%s" value_str
   | EXPN_binary(op, l, r) ->
     let op = match op with
-      | OP_add -> "+"
-      | OP_sub -> "-"
-      | OP_mul -> "*"
-      | OP_div -> "/"
-      | OP_mod -> "%"
+      | OP_add    -> "+"
+      | OP_sub    -> "-"
+      | OP_mul    -> "*"
+      | OP_div    -> "/"
+      | OP_mod    -> "%"
       | OP_equals -> "="
+      | OP_gt     -> ">"
+      | OP_gte    -> ">="
+      | OP_lt     -> "<"
+      | OP_lte    -> "<="
     in
     let lvalue = pretty_string_of_expr l in
     let rvalue = pretty_string_of_expr r in

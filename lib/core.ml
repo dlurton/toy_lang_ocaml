@@ -41,11 +41,11 @@ let rec inner_eval (e: expr_t) (env: env_t) : value_t =
   | EXPN_literal n -> n
   | EXPN_binary(op, left, right) ->
     let values = ((inner_eval left env), (inner_eval right env)) in
-    let binary_int_op (func: int * int -> int) =
+    let binary_int_op (func: int * int -> value_t) =
       begin
         match values with
         (* we have integers on both sides -- perform addition *)
-        | (VAL_i32 lval, VAL_i32 rval) -> VAL_i32(func(lval, rval))
+        | (VAL_i32 lval, VAL_i32 rval) -> func(lval, rval)
         | _ ->
             (* we have a non-integer somewhere *)
             raise (InterpExn(e.loc, ERR_arithmetic_on_non_number))
@@ -59,11 +59,15 @@ let rec inner_eval (e: expr_t) (env: env_t) : value_t =
           | (VAL_bool lval, VAL_bool rval) -> VAL_bool(lval = rval)
           | (_, _) -> VAL_bool(false)
         end
-      | OP_add -> binary_int_op (fun (l, r) -> l + r)
-      | OP_sub -> binary_int_op (fun (l, r) -> l - r)
-      | OP_mul -> binary_int_op (fun (l, r) -> l * r)
-      | OP_div -> binary_int_op (fun (l, r) -> l / r)
-      | OP_mod -> binary_int_op (fun (l, r) -> l mod r)
+      | OP_add  -> binary_int_op (fun (l, r) -> VAL_i32(l + r))
+      | OP_sub  -> binary_int_op (fun (l, r) -> VAL_i32(l - r))
+      | OP_mul  -> binary_int_op (fun (l, r) -> VAL_i32(l * r))
+      | OP_div  -> binary_int_op (fun (l, r) -> VAL_i32(l / r))
+      | OP_mod  -> binary_int_op (fun (l, r) -> VAL_i32(l mod r))
+      | OP_gt   -> binary_int_op (fun (l, r) -> VAL_bool(l > r))
+      | OP_gte  -> binary_int_op (fun (l, r) -> VAL_bool(l >= r))
+      | OP_lt   -> binary_int_op (fun (l, r) -> VAL_bool(l < r))
+      | OP_lte  -> binary_int_op (fun (l, r) -> VAL_bool(l <= r))
     end
   | EXPN_if(cond_exp, then_exp, else_exp) ->
       let cond_val = inner_eval cond_exp env in

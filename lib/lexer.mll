@@ -43,6 +43,10 @@ rule read =
   | "->"                { ARROW }
   | "func"              { FUNC }
   | "="                 { EQUALS }
+  | ">"                 { GT }
+  | ">="                { GTE }
+  | "<"                 { LT }
+  | "<="                { LTE }
   | "in"                { IN }
   | "true"              { TRUE }
   | "false"             { FALSE }

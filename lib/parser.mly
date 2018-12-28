@@ -11,7 +11,7 @@ It looked something like: `%token LET "let"`
 %token <int> INT
 %token <string> ID
 %token TRUE FALSE
-%token ADD SUB MUL DIV MOD EQUALS
+%token ADD SUB MUL DIV MOD EQUALS GT GTE LT LTE
 %token LPAREN RPAREN
 %token LET REC
 %token IF THEN ELSE
@@ -26,6 +26,7 @@ It looked something like: `%token LET "let"`
  ****)
 
 %nonassoc IN ELSE ARROW
+%left GT GTE LT LTE
 %left EQUALS
 %left ADD SUB
 (*
@@ -78,6 +79,14 @@ expr:
     { make_node (EXPN_binary(OP_mod, e1, e2)) (op; $startpos(op)) }
   | e1 = expr; op = EQUALS; e2 = expr
     { make_node (EXPN_binary(OP_equals, e1, e2)) (op; $startpos(op)) }
+  | e1 = expr; op = GT; e2 = expr
+    { make_node (EXPN_binary(OP_gt, e1, e2)) (op; $startpos(op)) }
+  | e1 = expr; op = GTE; e2 = expr
+    { make_node (EXPN_binary(OP_gte, e1, e2)) (op; $startpos(op)) }
+  | e1 = expr; op = LT; e2 = expr
+    { make_node (EXPN_binary(OP_lt, e1, e2)) (op; $startpos(op)) }
+  | e1 = expr; op = LTE; e2 = expr
+    { make_node (EXPN_binary(OP_lte, e1, e2)) (op; $startpos(op)) }
 
   (* if expression *)
   | IF; cond_exp = expr; THEN; then_exp = expr; ELSE; else_exp = expr;

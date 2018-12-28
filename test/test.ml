@@ -39,6 +39,23 @@ let suite = "toy_lang_suite" >:::
               "binary_eq_int_4">::expect_bool false "2 = 1";
               "binary_eq_int_5">::expect_bool true "9 + 1 = 8 + 2";
 
+              (* integer comparison *)
+              "binary_gt_int_2_1">::expect_bool true "2 > 1";
+              "binary_gt_int_2_2">::expect_bool false "2 > 2";
+              "binary_gt_int_2_3">::expect_bool false "2 > 3";
+              "binary_gte_int_2_1">::expect_bool true "2 >= 1";
+              "binary_gte_int_2_2">::expect_bool true "2 >= 2";
+              "binary_gte_int_2_3">::expect_bool false "2 >= 3";
+
+              "binary_lt_int_2_1">::expect_bool false "2 < 1";
+              "binary_lt_int_2_2">::expect_bool false "2 < 2";
+              "binary_lt_int_2_3">::expect_bool true "2 < 3";
+              "binary_lte_int_2_1">::expect_bool false "2 <= 1";
+              "binary_lte_int_2_2">::expect_bool true "2 <= 2";
+              "binary_lte_int_2_3">::expect_bool true "2 <= 3";
+
+
+
               (* mixed type equality (TODO: should these really be errors instead of evaluating to false?) *)
               "binary_eq_mixed_1">::expect_bool false "1 = true";
               "binary_eq_mixed_2">::expect_bool false "true = 1";
@@ -155,9 +172,7 @@ let f =
               "let_rec_fib">::expect_int 34 "
 let rec fib =
   func n ->
-    // TODO:  when <= is added, change this nested if else to if n <= 1
-    if n = 0 then 1
-    else if n = 1 then 1
+    if n <= 1 then 1
     else fib(n - 1) + fib(n - 2)
   in
     fib(8)

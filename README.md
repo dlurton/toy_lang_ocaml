@@ -43,9 +43,7 @@ Everybody loves fibonacci:
 ```
 let rec fib =
   func n ->
-    // TODO:  when <= is added, change this nested if else to if n <= 1
-    if n = 0 then 1
-    else if n = 1 then 1
+    if n <= 1 then 1
     else fib(n - 1) + fib(n - 2)
   in
     fib(8)
@@ -85,7 +83,6 @@ OCAML toy language REPL - type "?exit" to exit
 
 ## TODO
 
-- Comparison operators: `>`, `>=`, `<`, `<=`
 - Logical operators: `&&`, `||` and `^^`
 - A foreign function interface to OCaml
 - Add the language features of your choice.

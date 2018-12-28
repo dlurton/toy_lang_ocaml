@@ -14,6 +14,14 @@ Languages" by Friedman and Wand.  The example code from the book can be found
 The original files for CS3110 can be downloaded 
 [here](https://www.cs.cornell.edu/courses/cs3110/2015fa/l/12-interp/rec-code.zip).
 
+## Non-Goals
+
+Being performant. This toy language exists to be a test bed to experiment and 
+learn about programming language implementation. To that
+end, readability and matinatinability are more important than just about
+anything else.  Performance is not a consideration except in the most 
+egregious situations.
+
 ## Features
 
 - Supported data types:
@@ -49,8 +57,6 @@ let rec fib =
     fib(8)
 ```
 
-
-
 See [the tests](./test/test.ml) for more examples.
 
 ## Building 
@@ -83,7 +89,7 @@ OCAML toy language REPL - type "?exit" to exit
 
 ## TODO
 
-- Logical operators: `&&`, `||` and `^^`
+- Mutually recursive functions, i.e. `let rec x = ... and y = xxx`
 - A foreign function interface to OCaml
 - Add the language features of your choice.
 
@@ -91,8 +97,8 @@ OCAML toy language REPL - type "?exit" to exit
 
 ### Working With Menhir 
 
-If, after modifying `parser.mly` a message appears about shift/reduce conflicts, it can be hard to diagnose
-what's going on.  To get `menhir` to tell you about the shift/reduce conflicts, execute
+If after modifying `parser.mly` a message appears about shift/reduce conflicts, it can be hard to diagnose
+what's going on.  To get `menhir` to tell you about the shift/reduce conflicts, execute:
 
 ```
 menhir --explain lib/parser.mly

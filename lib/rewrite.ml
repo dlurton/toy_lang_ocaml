@@ -13,6 +13,11 @@ let rewrite outer_e (outer_ctx: 'cx) (custom_rewrite: 'cx custom_rewriter_t) =
               | EXPN_var id -> EXPN_var(id)
               | EXPN_index (i, j) -> EXPN_index(i, j)
               | EXPN_literal n -> EXPN_literal(n)
+              | EXPN_logical(lop, left, right) -> EXPN_logical(
+                  lop,
+                  (inner_rewrite left ctx),
+                  (inner_rewrite right ctx)
+                )
               | EXPN_binary(op, left, right) -> EXPN_binary(
                   op,
                   (inner_rewrite left ctx),

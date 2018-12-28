@@ -31,11 +31,15 @@ type op_t =
   | OP_mul
   | OP_div
   | OP_mod
-  | OP_equals
+  | OP_eq
   | OP_gt
   | OP_gte
   | OP_lt
   | OP_lte
+
+type logical_op_t = 
+  | LOP_and (* logical and *)
+  | LOP_or (* logical or *)
 
 (* The types of the language. *)
 and value_t =
@@ -56,6 +60,7 @@ and expr_node_t =
   | EXPN_index    of int * int
   | EXPN_literal  of value_t
   | EXPN_binary   of op_t * expr_t * expr_t
+  | EXPN_logical  of logical_op_t * expr_t * expr_t
   | EXPN_let      of string * bool * expr_t * expr_t
   | EXPN_if       of expr_t * expr_t * expr_t
   | EXPN_func     of string list * expr_t
@@ -71,6 +76,7 @@ type parse_result =
 type error_t =
   | ERR_unbound_var of string (* can only happen during the resolve rewrite. *)
   | ERR_if_cond_not_bool
+  | ERR_logical_operand_not_bool
   | ERR_invoked_non_func
   | ERR_arithmetic_on_non_number
   | ERR_incorrect_arg_count of int * int
@@ -79,6 +85,7 @@ let string_of_error err =
   match err with
   | ERR_unbound_var id -> Printf.sprintf "unbound variable '%s'" id
   | ERR_if_cond_not_bool -> "if condition was not a bool value"
+  | ERR_logical_operand_not_bool -> "operand to logical operator was not a boolean value"
   | ERR_invoked_non_func -> "cannot call a value that is not a function"
   | ERR_arithmetic_on_non_number -> "attempted to perform arithmetic on a value that was not a number"
   | ERR_incorrect_arg_count(expected, actual) ->

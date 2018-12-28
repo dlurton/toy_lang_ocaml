@@ -47,6 +47,8 @@ rule read =
   | ">="                { GTE }
   | "<"                 { LT }
   | "<="                { LTE }
+  | "&&"                { LAND } 
+  | "||"                { LOR }
   | "in"                { IN }
   | "true"              { TRUE }
   | "false"             { FALSE }

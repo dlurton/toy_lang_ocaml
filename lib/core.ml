@@ -30,48 +30,74 @@ let apply_env env env_index var_index =
 (* Evaluates the parsed expression with the specified top-level environment. *)
 let eval e top_env : interp_result =
   let rec inner_eval (e: expr_t) (env: env_t) : value_t =
-  match e.exp with
-  | EXPN_var id -> failwith ("Variable '" ^ id ^ "' still existed for some reason")
-  | EXPN_index (env_index, var_index) ->
-    let value =
-      apply_env env env_index var_index in
-    begin
-      match value with
-      | VAL_ref r -> !r (* For now, automatically dereference. *)
-      | x -> x
-    end
-  | EXPN_literal n -> n
-  | EXPN_binary(op, left, right) ->
-    let values = ((inner_eval left env), (inner_eval right env)) in
-    let binary_int_op (func: int * int -> value_t) =
+    match e.exp with
+    | EXPN_var id -> failwith ("Variable '" ^ id ^ "' still existed for some reason")
+    | EXPN_index (env_index, var_index) ->
+      let value =
+        apply_env env env_index var_index in
       begin
-        match values with
-        (* we have integers on both sides -- perform addition *)
-        | (VAL_i32 lval, VAL_i32 rval) -> func(lval, rval)
-        | _ ->
-            (* we have a non-integer somewhere *)
-            raise (InterpExn(e.loc, ERR_arithmetic_on_non_number))
-      end in
-    begin
-      match op with
-      | OP_equals ->
+        match value with
+        | VAL_ref r -> !r (* For now, automatically dereference. *)
+        | x -> x
+      end
+    | EXPN_literal n -> n
+    | EXPN_logical(lop, left, right) ->
+      begin
+        let eval_bool expr = match inner_eval expr env with
+          | VAL_bool b -> b
+          | _ -> raise (InterpExn(expr.loc, ERR_logical_operand_not_bool))
+        in
+        match lop with 
+        | LOP_and ->
+          begin
+            let lval = eval_bool left in
+            (* short circuit; if left side is true do not evaluate right side *)
+            if lval then
+              VAL_bool(eval_bool right)
+            else
+              VAL_bool(false)
+          end
+        | LOP_or ->
+          begin
+            (* short circuit; if only evaluate right side if left side is false *)
+            let lval = eval_bool left in
+            if not lval then
+              VAL_bool(eval_bool right)
+            else
+              VAL_bool(true)
+          end
+      end
+    | EXPN_binary(op, left, right) ->
+      let values = ((inner_eval left env), (inner_eval right env)) in
+      let binary_int_op (func: int * int -> value_t) =
         begin
           match values with
-          | (VAL_i32 lval, VAL_i32 rval) -> VAL_bool(lval = rval)
-          | (VAL_bool lval, VAL_bool rval) -> VAL_bool(lval = rval)
-          | (_, _) -> VAL_bool(false)
-        end
-      | OP_add  -> binary_int_op (fun (l, r) -> VAL_i32(l + r))
-      | OP_sub  -> binary_int_op (fun (l, r) -> VAL_i32(l - r))
-      | OP_mul  -> binary_int_op (fun (l, r) -> VAL_i32(l * r))
-      | OP_div  -> binary_int_op (fun (l, r) -> VAL_i32(l / r))
-      | OP_mod  -> binary_int_op (fun (l, r) -> VAL_i32(l mod r))
-      | OP_gt   -> binary_int_op (fun (l, r) -> VAL_bool(l > r))
-      | OP_gte  -> binary_int_op (fun (l, r) -> VAL_bool(l >= r))
-      | OP_lt   -> binary_int_op (fun (l, r) -> VAL_bool(l < r))
-      | OP_lte  -> binary_int_op (fun (l, r) -> VAL_bool(l <= r))
-    end
-  | EXPN_if(cond_exp, then_exp, else_exp) ->
+          (* we have integers on both sides -- perform addition *)
+          | (VAL_i32 lval, VAL_i32 rval) -> func(lval, rval)
+          | _ ->
+            (* we have a non-integer somewhere *)
+            raise (InterpExn(e.loc, ERR_arithmetic_on_non_number))
+        end in
+      begin
+        match op with
+        | OP_eq ->
+          begin
+            match values with
+            | (VAL_i32 lval, VAL_i32 rval) -> VAL_bool(lval = rval)
+            | (VAL_bool lval, VAL_bool rval) -> VAL_bool(lval = rval)
+            | (_, _) -> VAL_bool(false)
+          end
+        | OP_add  -> binary_int_op (fun (l, r) -> VAL_i32(l + r))
+        | OP_sub  -> binary_int_op (fun (l, r) -> VAL_i32(l - r))
+        | OP_mul  -> binary_int_op (fun (l, r) -> VAL_i32(l * r))
+        | OP_div  -> binary_int_op (fun (l, r) -> VAL_i32(l / r))
+        | OP_mod  -> binary_int_op (fun (l, r) -> VAL_i32(l mod r))
+        | OP_gt   -> binary_int_op (fun (l, r) -> VAL_bool(l > r))
+        | OP_gte  -> binary_int_op (fun (l, r) -> VAL_bool(l >= r))
+        | OP_lt   -> binary_int_op (fun (l, r) -> VAL_bool(l < r))
+        | OP_lte  -> binary_int_op (fun (l, r) -> VAL_bool(l <= r))
+      end
+    | EXPN_if(cond_exp, then_exp, else_exp) ->
       let cond_val = inner_eval cond_exp env in
       begin
         match cond_val with
@@ -126,8 +152,8 @@ let parse s =
     PR_success(ast)
   with LexicalExn(src_loc, msg) ->
     PR_error(src_loc, "Lexical error: " ^ msg)
-    | Parser.Error ->
-      let sloc = Util.src_loc_of_position lexbuf.lex_curr_p in 
+     | Parser.Error ->
+       let sloc = Util.src_loc_of_position lexbuf.lex_curr_p in 
        PR_error(sloc, "Syntax error near this position")
 
 

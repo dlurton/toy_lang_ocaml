@@ -9,22 +9,28 @@ let rec pretty_string_of_expr e =
   | EXPN_literal n ->
     let value_str = pretty_string_of_value n in
     sprintf "%s" value_str
+  | EXPN_logical(lop, l, r) ->
+    sprintf "(%s) %s (%s)"
+      (pretty_string_of_expr l)
+      (match lop with
+      | LOP_and   -> "&&"
+      | LOP_or    -> "||")
+      (pretty_string_of_expr r)
   | EXPN_binary(op, l, r) ->
-    let op = match op with
+    sprintf " (%s) %s (%s) "
+      (pretty_string_of_expr l)
+      (match op with
       | OP_add    -> "+"
       | OP_sub    -> "-"
       | OP_mul    -> "*"
       | OP_div    -> "/"
       | OP_mod    -> "%"
-      | OP_equals -> "="
+      | OP_eq     -> "="
       | OP_gt     -> ">"
       | OP_gte    -> ">="
       | OP_lt     -> "<"
-      | OP_lte    -> "<="
-    in
-    let lvalue = pretty_string_of_expr l in
-    let rvalue = pretty_string_of_expr r in
-    sprintf " (%s) %s (%s) " lvalue op rvalue
+      | OP_lte    -> "<=")
+      (pretty_string_of_expr r)
   | EXPN_if(c, t, e) ->
     sprintf "if %s then %s else %s"
       (pretty_string_of_expr c)

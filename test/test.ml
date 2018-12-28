@@ -54,13 +54,34 @@ let suite = "toy_lang_suite" >:::
               "binary_lte_int_2_2">::expect_bool true "2 <= 2";
               "binary_lte_int_2_3">::expect_bool true "2 <= 3";
 
-
-
               (* mixed type equality (TODO: should these really be errors instead of evaluating to false?) *)
               "binary_eq_mixed_1">::expect_bool false "1 = true";
               "binary_eq_mixed_2">::expect_bool false "true = 1";
               (* TODO: should function equality be supported or should it just be a error? *)
 
+              (* logical operators *)
+              "and_1">::expect_bool true "true && true";
+              "and_2">::expect_bool false "false && true";
+              "and_3">::expect_bool false "true && false";
+              "and_4">::expect_bool false "false && false";
+
+              "or_1">::expect_bool true "true || true";
+              "or_2">::expect_bool true "false || true";
+              "or_3">::expect_bool true "true || false";
+              "or_4">::expect_bool false "false && false";
+
+              (* logical operator errors *)
+              "and_not_bool_1">::expect_error 1 1 ERR_logical_operand_not_bool "1 && true";
+              "and_not_bool_2">::expect_error 1 9 ERR_logical_operand_not_bool "true && 1";
+              (* note: short circuiting prevents right side from being evaluated *)
+              "and_not_bool_3">::expect_bool false "false && 1";
+
+              "or_not_bool_1">::expect_error 1 1  ERR_logical_operand_not_bool "1 || true";
+              "or_not_bool_2">::expect_error 1 10 ERR_logical_operand_not_bool "false || 1";
+              (* note: short circuiting prevents right side from being evaluated *)
+              "or_not_bool_3">::expect_bool true "true || 1";
+
+              (* integer arithmetic *)
               "binary_add_1">::expect_int 10 "8 + 2";
               "binary_add_2">::expect_int 196 "97 + 99";
               "binary_add_3">::expect_int 22 "8 + 2 + 12";

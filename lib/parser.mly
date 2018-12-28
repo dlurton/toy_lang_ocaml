@@ -12,6 +12,7 @@ It looked something like: `%token LET "let"`
 %token <string> ID
 %token TRUE FALSE
 %token ADD SUB MUL DIV MOD EQUALS GT GTE LT LTE
+%token LAND LOR (* logical and and logical or *)
 %token LPAREN RPAREN
 %token LET REC
 %token IF THEN ELSE
@@ -26,6 +27,8 @@ It looked something like: `%token LET "let"`
  ****)
 
 %nonassoc IN ELSE ARROW
+%left LOR
+%left LAND
 %left GT GTE LT LTE
 %left EQUALS
 %left ADD SUB
@@ -78,7 +81,7 @@ expr:
   | e1 = expr; op = MOD; e2 = expr
     { make_node (EXPN_binary(OP_mod, e1, e2)) (op; $startpos(op)) }
   | e1 = expr; op = EQUALS; e2 = expr
-    { make_node (EXPN_binary(OP_equals, e1, e2)) (op; $startpos(op)) }
+    { make_node (EXPN_binary(OP_eq, e1, e2)) (op; $startpos(op)) }
   | e1 = expr; op = GT; e2 = expr
     { make_node (EXPN_binary(OP_gt, e1, e2)) (op; $startpos(op)) }
   | e1 = expr; op = GTE; e2 = expr
@@ -87,6 +90,10 @@ expr:
     { make_node (EXPN_binary(OP_lt, e1, e2)) (op; $startpos(op)) }
   | e1 = expr; op = LTE; e2 = expr
     { make_node (EXPN_binary(OP_lte, e1, e2)) (op; $startpos(op)) }
+  | e1 = expr; op = LAND; e2 = expr
+    { make_node (EXPN_logical(LOP_and, e1, e2)) (op; $startpos(op)) }
+  | e1 = expr; op = LOR; e2 = expr
+    { make_node (EXPN_logical(LOP_or, e1, e2)) (op; $startpos(op)) }
 
   (* if expression *)
   | IF; cond_exp = expr; THEN; then_exp = expr; ELSE; else_exp = expr;

@@ -44,14 +44,21 @@ let resolve_rewrite (expr: expr_t) =
         ))
       (* let rec is similar to let, but executes both value_exp
          and body_exp in the extended environment so that
-         value_exp has access to the variable being defined. *)
-      | EXPN_let_rec(id, value_exp, body_exp ) ->
-        let let_senv = extend_senv [id] senv in
+         value_exp has access to the variable being defined.
+         let rec also supports multiple variable definitions. *)
+      | EXPN_let_rec(var_defs, body_exp) ->
+        let ids = var_defs |> List.map (fun vd -> let (id, _) = vd in id) in
+        let let_senv = extend_senv ids senv in
+        let new_var_defs =
+          var_defs |> List.map
+            (fun vd ->
+               let (id, value_exp) = vd in
+               (id, (rewrite value_exp let_senv inner_resolve_rewrite)))
+        in
         Some(EXPN_let_rec(
-          id,
-          (rewrite value_exp let_senv inner_resolve_rewrite),
-          (rewrite body_exp let_senv inner_resolve_rewrite)
-        ))
+            new_var_defs,
+            (rewrite body_exp let_senv inner_resolve_rewrite)
+          ))
       | EXPN_func(arg_id, body_exp) ->
         let arg_senv = extend_senv arg_id senv in
         Some(EXPN_func(

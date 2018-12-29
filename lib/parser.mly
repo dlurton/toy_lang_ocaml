@@ -14,7 +14,7 @@ It looked something like: `%token LET "let"`
 %token ADD SUB MUL DIV MOD EQUALS GT GTE LT LTE
 %token LAND LOR (* logical and and logical or *)
 %token LPAREN RPAREN
-%token LET REC
+%token LET REC AND
 %token IF THEN ELSE
 %token FUNC
 %token IN ARROW
@@ -41,12 +41,17 @@ It looked something like: `%token LET "let"`
 %nonassoc LPAREN
 
 %start <Types.expr_t> prog
-
+%type <var_def_t> var_def
 %%
 
 prog:
 	| e = expr; EOF { e }
 	;
+
+var_def:
+  | id = ID; EQUALS; value_exp = expr;
+    { (id, value_exp) }
+  ;
 
 expr:
  (* Note the odd use of (op; $startpos(op))--this is needed instead of
@@ -102,8 +107,9 @@ expr:
   (* let & let rec expressions *)
   | LET; id = ID; EQUALS; value_exp = expr; IN; body_exp = expr
     { make_node (EXPN_let (id, value_exp, body_exp)) $startpos }
-  | LET; REC; id = ID; EQUALS; value_exp = expr; IN; body_exp = expr
-    { make_node (EXPN_let_rec (id, value_exp, body_exp)) $startpos }
+  | LET; REC; var_decls = separated_nonempty_list(AND, var_def);
+    IN; body_exp = expr
+    { make_node (EXPN_let_rec (var_decls, body_exp)) $startpos }
 
   (* function constructor expression *)
   | FUNC; param_names = list(ID); ARROW; body = expr;

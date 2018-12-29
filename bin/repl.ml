@@ -12,9 +12,12 @@ let rec user_input prompt cb =
     user_input prompt cb
 
 let show_error sloc msg =
-  if (String.length sloc.file) != 0 then Printf.printf "%s: " sloc.file;
-  Printf.printf "(%d, %d): %s\n" sloc.line_num sloc.char_offset msg;
-  flush(stdout)
+  if (String.length sloc.file) <> 0 then Printf.printf "%s: " sloc.file
+  else
+    let pointer = (String.make sloc.char_offset ' ') ^ "^" in
+    print_endline pointer;
+    Printf.printf "(%d, %d): %s\n" sloc.line_num sloc.char_offset msg;
+    flush(stdout)
 
 let interpret_line line_text =
   (* attempt to parse the line *)

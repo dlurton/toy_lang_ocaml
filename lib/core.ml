@@ -32,14 +32,7 @@ let eval e top_env : interp_result =
   let rec inner_eval (e: expr_t) (env: env_t) : value_t =
     match e.exp with
     | EXPN_var id -> failwith ("Variable '" ^ id ^ "' still existed for some reason")
-    | EXPN_index (env_index, var_index) ->
-      let value =
-        apply_env env env_index var_index in
-      begin
-        match value with
-        | VAL_ref r -> !r (* For now, automatically dereference. *)
-        | x -> x
-      end
+    | EXPN_index (env_index, var_index) -> apply_env env env_index var_index
     | EXPN_literal n -> n
     | EXPN_logical(lop, left, right) ->
       begin
@@ -111,10 +104,15 @@ let eval e top_env : interp_result =
         let the_value = inner_eval value_exp env in
         let nested_env = extend_env env [|the_value|] in
         inner_eval body_exp nested_env
-    | EXPN_let_rec(_, value_exp, body_exp ) ->
-        let future_val = ref (VAL_i32(0)) in (* provide a dummy value *)
-        let nested_env = extend_env env [|(VAL_ref(future_val))|] in
-        future_val := inner_eval value_exp nested_env;
+    | EXPN_let_rec(var_defs, body_exp) ->
+      let future_vals = Array.make (List.length var_defs) (VAL_i32(0)) in
+      let nested_env = extend_env env future_vals in
+        var_defs |> List.iteri
+          (fun i vd ->
+             let (_, value_exp) = vd in
+             let value = inner_eval value_exp nested_env in
+             Array.set future_vals i value
+          ); 
         inner_eval body_exp nested_env
     | EXPN_func(ids, body_exp) -> VAL_func((List.length ids), body_exp, env)
     | EXPN_call(func_exp, arg_exps) ->

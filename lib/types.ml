@@ -9,9 +9,8 @@ type src_loc_t = {
   char_offset: int;
 }
 
-let string_of_src_loc sloc =
-  let (file, line_num, char_offset) = sloc in
-  Printf.sprintf "%s:%d:%d" file, line_num, char_offset
+let string_of_src_loc (sloc:src_loc_t) =
+  Printf.sprintf "%s:%d:%d" sloc.file sloc.line_num sloc.char_offset
 
 let make_src_loc file line_num char_offset = {
   file = file;
@@ -37,7 +36,7 @@ type op_t =
   | OP_lt
   | OP_lte
 
-type logical_op_t = 
+type logical_op_t =
   | LOP_and (* logical and *)
   | LOP_or (* logical or *)
 
@@ -47,7 +46,6 @@ and value_t =
   | VAL_i32 of int
   (* tuple fields: argument count, function body, captured environment *)
   | VAL_func of int * expr_t * env_t
-  | VAL_ref of (value_t ref)
 (* An environment is, for now, simply a list of value_t *)
 and env_t = value_t array list
 (* The AST. *)
@@ -62,10 +60,11 @@ and expr_node_t =
   | EXPN_binary   of op_t * expr_t * expr_t
   | EXPN_logical  of logical_op_t * expr_t * expr_t
   | EXPN_let      of string * expr_t * expr_t
-  | EXPN_let_rec  of string * expr_t * expr_t
+  | EXPN_let_rec  of var_def_t list * expr_t
   | EXPN_if       of expr_t * expr_t * expr_t
   | EXPN_func     of string list * expr_t
   | EXPN_call     of expr_t * (expr_t list)
+and var_def_t = string * expr_t
 
 (* TODO: parse_result and interp_result really should have the _t suffix. *)
 (* The result of an attempt to parse a snippet of code. *)

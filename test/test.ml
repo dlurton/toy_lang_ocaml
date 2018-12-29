@@ -202,6 +202,23 @@ let rec fib =
   in
     fib(8)
 ";
+
+              (* let rec ... and *)
+              "let_rec_and_1">::expect_int 4 "
+let rec f1 = func n -> f2(n + 1)
+and f2 = func n -> n * 2
+in f1(1) ";
+
+              (* https://en.wikipedia.org/wiki/Hofstadter_sequence#Hofstadter_Female_and_Male_sequences *)
+              "let_rec_and_hofstadter">::expect_int 12 "
+let rec f = func n ->
+  if n = 0 then 1
+  else n - m(f(n - 1))
+and m = func n ->
+  if n = 0 then 0
+  else n - f(m(n - 1))
+in m(20)
+";
               (* func *)
               "func_zero_arg">::expect_int 11 "(func -> 11)()";
               "func_single_arg">::expect_int 1 "(func x -> x)(1)";

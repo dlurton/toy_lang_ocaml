@@ -7,7 +7,8 @@ open OUnit2;;
 let test_parse (source: string) : expr_t =
   let presult = (parse source) in
   match presult with
-  | PR_error(_, pmsg) -> assert_failure ("Parse error: " ^ pmsg)
+  | PR_error(loc, msg) -> assert_failure (Printf.sprintf "Parse error: %s %s"
+                                           (string_of_src_loc loc) msg)
   | PR_success e -> e 
 
 let test_eval (s: string) : value_t =
@@ -21,7 +22,9 @@ let test_eval (s: string) : value_t =
     ~msg: "default_rewrite_must return an exact copy of the original";
   let iresult = eval_with_empty_env exp in
   match iresult with
-  | IR_error (_, err) -> assert_failure ("Interp error: " ^ (string_of_error err))
+  | IR_error (loc, err) -> assert_failure (Printf.sprintf "Interp error: %s %s"
+                                           (string_of_src_loc loc)
+                                           (string_of_error err))
   | IR_success r -> r
 
 let value_to_int = function

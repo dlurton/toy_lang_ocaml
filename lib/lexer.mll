@@ -21,7 +21,7 @@ let white = [' ' '\t' '\r' '\n']+
 let digit = ['0'-'9']
 let int = '-'? digit+
 let letter = ['a'-'z' 'A'-'Z' '_']
-let id = letter+
+let id = letter+ digit*
 let single_line_comment = "//" [^'\n']*
 let multi_line_comment = "(*" _+ "*)"
 
@@ -40,6 +40,7 @@ rule read =
   | ")"                 { RPAREN }
   | "let"               { LET }
   | "rec"               { REC }
+  | "and"               { AND }
   | "->"                { ARROW }
   | "func"              { FUNC }
   | "="                 { EQUALS }

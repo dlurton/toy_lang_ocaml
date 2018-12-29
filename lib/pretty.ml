@@ -41,10 +41,15 @@ let rec pretty_string_of_expr e =
       name
       (pretty_string_of_expr value_exp)
       (pretty_string_of_expr body_exp)
-  | EXPN_let_rec(name, value_exp, body_exp) ->
-    sprintf "let rec %s = %s in %s"
-      name
-      (pretty_string_of_expr value_exp)
+  | EXPN_let_rec(var_defs, body_exp) ->
+    let var_def_strs =
+      var_defs |> List.map
+        (fun vd ->
+          let (id, value_exp) = vd in
+          sprintf "%s = %s" id (pretty_string_of_expr value_exp))
+    in
+    sprintf "let rec %s in %s"
+      (String.concat " and " var_def_strs)
       (pretty_string_of_expr body_exp)
   | EXPN_call(func_exp, arg_exps) ->
     sprintf "%s(%s)"
@@ -61,5 +66,3 @@ and pretty_string_of_value = function
     sprintf "func_value (%d args) -> %s"
       arg_count
       (pretty_string_of_expr body_exp)
-  | VAL_ref r ->
-    sprintf "(ref %s)" (pretty_string_of_value !r)

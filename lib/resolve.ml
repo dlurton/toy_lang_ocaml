@@ -32,15 +32,24 @@ let senv_lookup id top_senv =
 let resolve_rewrite (expr: expr_t) =
   let rec inner_resolve_rewrite e senv =
     let new_e = match e.exp with
-      | EXPN_let(id, recursive, value_exp, body_exp ) ->
-        (* the new static environment defined by the let *)
+      (* let evaluates value_exp, then extends the environment
+         with the result, and executes body_exp under this
+         extended environment *)
+      | EXPN_let(id, value_exp, body_exp ) ->
         let let_senv = extend_senv [id] senv in
-        (* the static environment of the value expression *)
-        let senv_for_value = if not recursive then senv else let_senv in
         Some(EXPN_let(
           id,
-          recursive,
-          (rewrite value_exp senv_for_value inner_resolve_rewrite),
+          (rewrite value_exp senv inner_resolve_rewrite),
+          (rewrite body_exp let_senv inner_resolve_rewrite)
+        ))
+      (* let rec is similar to let, but executes both value_exp
+         and body_exp in the extended environment so that
+         value_exp has access to the variable being defined. *)
+      | EXPN_let_rec(id, value_exp, body_exp ) ->
+        let let_senv = extend_senv [id] senv in
+        Some(EXPN_let_rec(
+          id,
+          (rewrite value_exp let_senv inner_resolve_rewrite),
           (rewrite body_exp let_senv inner_resolve_rewrite)
         ))
       | EXPN_func(arg_id, body_exp) ->

@@ -16,7 +16,9 @@ let test_eval (s: string) : value_t =
      produces an exact clone of its original. *)
   let new_exp = default_rewrite exp in
   assert_bool "default_rewrite must return a new instance" (exp != new_exp);
-  assert_equal exp new_exp ~printer:pretty_string_of_expr;
+  assert_equal exp new_exp
+    ~printer:pretty_string_of_expr
+    ~msg: "default_rewrite_must return an exact copy of the original";
   let iresult = eval_with_empty_env exp in
   match iresult with
   | IR_error (_, err) -> assert_failure ("Interp error: " ^ (string_of_error err))

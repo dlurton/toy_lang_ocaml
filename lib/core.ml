@@ -107,12 +107,11 @@ let eval e top_env : interp_result =
         | VAL_bool(false) -> inner_eval else_exp env
         | _ -> raise (InterpExn(cond_exp.loc, ERR_if_cond_not_bool))
       end
-    | EXPN_let(_, recursive, value_exp, body_exp ) ->
-      if not recursive then
+    | EXPN_let(_, value_exp, body_exp ) ->
         let the_value = inner_eval value_exp env in
         let nested_env = extend_env env [|the_value|] in
         inner_eval body_exp nested_env
-      else
+    | EXPN_let_rec(_, value_exp, body_exp ) ->
         let future_val = ref (VAL_i32(0)) in (* provide a dummy value *)
         let nested_env = extend_env env [|(VAL_ref(future_val))|] in
         future_val := inner_eval value_exp nested_env;

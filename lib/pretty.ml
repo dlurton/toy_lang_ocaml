@@ -36,11 +36,16 @@ let rec pretty_string_of_expr e =
       (pretty_string_of_expr c)
       (pretty_string_of_expr t)
       (pretty_string_of_expr e)
-  | EXPN_let(name, recursive, value_exp, body_exp) ->
-    let value_str = pretty_string_of_expr value_exp in
-    let body_str = pretty_string_of_expr body_exp in
-    let rec_str = if recursive then "rec " else "" in
-    sprintf "let %s%s = %s in %s" rec_str name value_str body_str
+  | EXPN_let(name, value_exp, body_exp) ->
+    sprintf "let %s = %s in %s"
+      name
+      (pretty_string_of_expr value_exp)
+      (pretty_string_of_expr body_exp)
+  | EXPN_let_rec(name, value_exp, body_exp) ->
+    sprintf "let rec %s = %s in %s"
+      name
+      (pretty_string_of_expr value_exp)
+      (pretty_string_of_expr body_exp)
   | EXPN_call(func_exp, arg_exps) ->
     sprintf "%s(%s)"
       (pretty_string_of_expr func_exp)

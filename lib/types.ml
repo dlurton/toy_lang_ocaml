@@ -61,7 +61,8 @@ and expr_node_t =
   | EXPN_literal  of value_t
   | EXPN_binary   of op_t * expr_t * expr_t
   | EXPN_logical  of logical_op_t * expr_t * expr_t
-  | EXPN_let      of string * bool * expr_t * expr_t
+  | EXPN_let      of string * expr_t * expr_t
+  | EXPN_let_rec  of string * expr_t * expr_t
   | EXPN_if       of expr_t * expr_t * expr_t
   | EXPN_func     of string list * expr_t
   | EXPN_call     of expr_t * (expr_t list)

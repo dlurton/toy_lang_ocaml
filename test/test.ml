@@ -122,7 +122,7 @@ let suite = "toy_lang_suite" >:::
               "binary_div_12">::expect_int 2 "4 / 2";
               "binary_div_13">::expect_int 4 "8 / 2";
               "binary_div_14">::expect_int 32768 "65536 / 2";
-              (*TODO divide by 0 (don't have this kind of error handling wired up yet) *)
+              "binary_div_by_zero">::expect_error 1 3 ERR_div_0 "1 / 0";
 
               "binary_mod_01">::expect_int 0 "0 % 1";
               "binary_mod_02">::expect_int 0 "0 % -1";
@@ -134,7 +134,7 @@ let suite = "toy_lang_suite" >:::
               "binary_mod_08">::expect_int 3 "3 % 5";
               "binary_mod_09">::expect_int 2 "2 % 5";
               "binary_mod_10">::expect_int 1 "1 % 5";
-              (*TODO mod by 0 *)
+              "binary_mod_by_zero">::expect_error 1 3 ERR_div_0 "1 % 0";
 
               (* basic binary order of operations *)
               "binary_order_of_operations_1">::expect_int 7 "1 + 2 * 3";       (* * higher than + *)

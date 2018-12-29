@@ -90,8 +90,10 @@ let eval e top_env : interp_result =
         | OP_add  -> binary_int_op (fun (l, r) -> VAL_i32(l + r))
         | OP_sub  -> binary_int_op (fun (l, r) -> VAL_i32(l - r))
         | OP_mul  -> binary_int_op (fun (l, r) -> VAL_i32(l * r))
-        | OP_div  -> binary_int_op (fun (l, r) -> VAL_i32(l / r))
-        | OP_mod  -> binary_int_op (fun (l, r) -> VAL_i32(l mod r))
+        | OP_div  -> binary_int_op (fun (l, r) ->
+            if r = 0 then raise (InterpExn(e.loc, ERR_div_0)) else VAL_i32(l / r))
+        | OP_mod  -> binary_int_op (fun (l, r) ->
+            if r = 0 then raise (InterpExn(e.loc, ERR_div_0)) else VAL_i32(l mod r))
         | OP_gt   -> binary_int_op (fun (l, r) -> VAL_bool(l > r))
         | OP_gte  -> binary_int_op (fun (l, r) -> VAL_bool(l >= r))
         | OP_lt   -> binary_int_op (fun (l, r) -> VAL_bool(l < r))

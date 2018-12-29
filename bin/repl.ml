@@ -3,7 +3,6 @@ open Toy_lang.Types
 open Toy_lang.Core
 open Toy_lang.Pretty
 
-;;
 
 let rec user_input prompt cb =
   match LNoise.linenoise prompt with
@@ -46,4 +45,4 @@ let () =
      LNoise.history_save ~filename:history_file |> ignore;
      interpret_line from_user
   )
-  |> user_input"> "
+  |> user_input "> "

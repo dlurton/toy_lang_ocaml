@@ -79,6 +79,7 @@ type error_t =
   | ERR_logical_operand_not_bool
   | ERR_invoked_non_func
   | ERR_arithmetic_on_non_number
+  | ERR_div_0
   | ERR_incorrect_arg_count of int * int
 
 let string_of_error err =
@@ -87,6 +88,7 @@ let string_of_error err =
   | ERR_if_cond_not_bool -> "if condition was not a bool value"
   | ERR_logical_operand_not_bool -> "operand to logical operator was not a boolean value"
   | ERR_invoked_non_func -> "cannot call a value that is not a function"
+  | ERR_div_0 -> "divide by zero"
   | ERR_arithmetic_on_non_number -> "attempted to perform arithmetic on a value that was not a number"
   | ERR_incorrect_arg_count(expected, actual) ->
     Printf.sprintf "function expected %d argument(s) but %d were supplied" expected actual

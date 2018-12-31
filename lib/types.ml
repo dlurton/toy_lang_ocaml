@@ -40,31 +40,45 @@ type logical_op_t =
   | LOP_and (* logical and *)
   | LOP_or (* logical or *)
 
+type type_t =
+  | TY_int
+  | TY_bool
+  | TY_func of func_type_t
+
+and func_type_t = type_t list * type_t
+
 (* The types of the language. *)
 and value_t =
   | VAL_bool of bool
-  | VAL_i32 of int
+  | VAL_int of int
   (* tuple fields: argument count, function body, captured environment *)
   | VAL_func of int * expr_t * env_t
+  (* TODO:  remove VAL_TYPE *)
+  | VAL_type of type_t
+
 (* An environment is, for now, simply a list of value_t *)
 and env_t = value_t array list
+
 (* The AST. *)
 and expr_t = {
   exp : expr_node_t;
   loc : src_loc_t;
 }
+
 and expr_node_t =
   | EXPN_var      of string
   | EXPN_index    of int * int
   | EXPN_literal  of value_t
   | EXPN_binary   of op_t * expr_t * expr_t
   | EXPN_logical  of logical_op_t * expr_t * expr_t
-  | EXPN_let      of string * expr_t * expr_t
+  | EXPN_let      of var_def_t * expr_t
   | EXPN_let_rec  of var_def_t list * expr_t
   | EXPN_if       of expr_t * expr_t * expr_t
-  | EXPN_func     of string list * expr_t
+  | EXPN_func     of arg_def_t list * type_t * expr_t
   | EXPN_call     of expr_t * (expr_t list)
-and var_def_t = string * expr_t
+
+and var_def_t = string * type_t * expr_t
+and arg_def_t = string * type_t
 
 (* TODO: parse_result and interp_result really should have the _t suffix. *)
 (* The result of an attempt to parse a snippet of code. *)

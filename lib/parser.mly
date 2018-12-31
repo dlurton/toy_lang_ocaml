@@ -16,10 +16,10 @@ It looked something like: `%token LET "let"`
 %token LPAREN RPAREN
 %token LET REC AND
 %token IF THEN ELSE
-%token FUNC
+%token FUNC INT_TYPE BOOL_TYPE
 %token IN ARROW
 %token EOF
-%token COMMA
+%token COMMA COLON
 
 (****
   The order of tokens listed here specifies their precedence.
@@ -42,16 +42,34 @@ It looked something like: `%token LET "let"`
 
 %start <Types.expr_t> prog
 %type <var_def_t> var_def
+%type <type_t> type_spec
+%type <arg_def_t> arg_def
+
 %%
 
 prog:
 	| e = expr; EOF { e }
 	;
 
-var_def:
-  | id = ID; EQUALS; value_exp = expr;
-    { (id, value_exp) }
+type_spec:
+  | INT_TYPE;
+    { TY_int }
+  | BOOL_TYPE;
+    { TY_bool }
+  | LPAREN; arg_types = separated_list(COMMA, type_spec); RPAREN; ARROW ret_type = type_spec;
+    { TY_func(arg_types, ret_type) }
   ;
+
+var_def:
+  | id = ID; COLON; ty = type_spec; EQUALS; value_exp = expr;
+    { (id, ty, value_exp) }
+  ;
+
+arg_def:
+  | arg_id = ID; COLON; ty = type_spec
+    { (arg_id, ty) }
+  ;
+
 
 expr:
  (* Note the odd use of (op; $startpos(op))--this is needed instead of
@@ -62,10 +80,14 @@ expr:
   (* literals *)
   | TRUE     { make_node (EXPN_literal(VAL_bool(true))) $startpos}
   | FALSE    { make_node (EXPN_literal(VAL_bool(false))) $startpos }
-  | i = INT  { make_node (EXPN_literal(VAL_i32(i))) $startpos }
+  | i = INT  { make_node (EXPN_literal(VAL_int(i))) $startpos }
 
   (* variable reference *)
   | x = ID { make_node (EXPN_var(x)) $startpos }
+
+  (* type *)
+  (*| td = type_spec
+    { make_node (EXPN_literal(VAL_type(td))) $startpos }*)
 
   (* function call *)
   | proc_expr = expr; lp = LPAREN; args = separated_list(COMMA, expr); RPAREN;
@@ -105,13 +127,13 @@ expr:
     { make_node (EXPN_if (cond_exp, then_exp, else_exp)) $startpos }
 
   (* let & let rec expressions *)
-  | LET; id = ID; EQUALS; value_exp = expr; IN; body_exp = expr
-    { make_node (EXPN_let (id, value_exp, body_exp)) $startpos }
+  | LET; id = ID; COLON; ty = type_spec; EQUALS; value_exp = expr; IN; body_exp = expr
+    { make_node (EXPN_let ((id, ty, value_exp), body_exp)) $startpos }
   | LET; REC; var_decls = separated_nonempty_list(AND, var_def);
     IN; body_exp = expr
     { make_node (EXPN_let_rec (var_decls, body_exp)) $startpos }
 
   (* function constructor expression *)
-  | FUNC; param_names = list(ID); ARROW; body = expr;
-    { make_node (EXPN_func(param_names, body)) $startpos }
+  | FUNC; LPAREN; func_type = separated_list(COMMA, arg_def); RPAREN; ARROW; ret_type = type_spec; body = expr;
+    { make_node (EXPN_func(func_type, ret_type, body)) $startpos }
   ;

@@ -66,7 +66,7 @@ let eval e top_env : interp_result =
         begin
           match values with
           (* we have integers on both sides -- perform addition *)
-          | (VAL_i32 lval, VAL_i32 rval) -> func(lval, rval)
+          | (VAL_int lval, VAL_int rval) -> func(lval, rval)
           | _ ->
             (* we have a non-integer somewhere *)
             raise (InterpExn(e.loc, ERR_arithmetic_on_non_number))
@@ -76,17 +76,17 @@ let eval e top_env : interp_result =
         | OP_eq ->
           begin
             match values with
-            | (VAL_i32 lval, VAL_i32 rval) -> VAL_bool(lval = rval)
+            | (VAL_int lval, VAL_int rval) -> VAL_bool(lval = rval)
             | (VAL_bool lval, VAL_bool rval) -> VAL_bool(lval = rval)
             | (_, _) -> VAL_bool(false)
           end
-        | OP_add  -> binary_int_op (fun (l, r) -> VAL_i32(l + r))
-        | OP_sub  -> binary_int_op (fun (l, r) -> VAL_i32(l - r))
-        | OP_mul  -> binary_int_op (fun (l, r) -> VAL_i32(l * r))
+        | OP_add  -> binary_int_op (fun (l, r) -> VAL_int(l + r))
+        | OP_sub  -> binary_int_op (fun (l, r) -> VAL_int(l - r))
+        | OP_mul  -> binary_int_op (fun (l, r) -> VAL_int(l * r))
         | OP_div  -> binary_int_op (fun (l, r) ->
-            if r = 0 then raise (InterpExn(e.loc, ERR_div_0)) else VAL_i32(l / r))
+            if r = 0 then raise (InterpExn(e.loc, ERR_div_0)) else VAL_int(l / r))
         | OP_mod  -> binary_int_op (fun (l, r) ->
-            if r = 0 then raise (InterpExn(e.loc, ERR_div_0)) else VAL_i32(l mod r))
+            if r = 0 then raise (InterpExn(e.loc, ERR_div_0)) else VAL_int(l mod r))
         | OP_gt   -> binary_int_op (fun (l, r) -> VAL_bool(l > r))
         | OP_gte  -> binary_int_op (fun (l, r) -> VAL_bool(l >= r))
         | OP_lt   -> binary_int_op (fun (l, r) -> VAL_bool(l < r))
@@ -100,21 +100,22 @@ let eval e top_env : interp_result =
         | VAL_bool(false) -> inner_eval else_exp env
         | _ -> raise (InterpExn(cond_exp.loc, ERR_if_cond_not_bool))
       end
-    | EXPN_let(_, value_exp, body_exp ) ->
+    | EXPN_let(var_def, body_exp ) ->
+        let (_, _, value_exp) = var_def in 
         let the_value = inner_eval value_exp env in
         let nested_env = extend_env env [|the_value|] in
         inner_eval body_exp nested_env
     | EXPN_let_rec(var_defs, body_exp) ->
-      let future_vals = Array.make (List.length var_defs) (VAL_i32(0)) in
+      let future_vals = Array.make (List.length var_defs) (VAL_int(0)) in
       let nested_env = extend_env env future_vals in
         var_defs |> List.iteri
           (fun i vd ->
-             let (_, value_exp) = vd in
+             let (_, _, value_exp) = vd in
              let value = inner_eval value_exp nested_env in
              Array.set future_vals i value
           ); 
         inner_eval body_exp nested_env
-    | EXPN_func(ids, body_exp) -> VAL_func((List.length ids), body_exp, env)
+    | EXPN_func(ids, _, body_exp) -> VAL_func((List.length ids), body_exp, env)
     | EXPN_call(func_exp, arg_exps) ->
       let proc_val = inner_eval func_exp env in
       begin

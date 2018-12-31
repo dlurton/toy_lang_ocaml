@@ -28,24 +28,25 @@ let rewrite outer_e (outer_ctx: 'cx) (custom_rewrite: 'cx custom_rewriter_t) =
                   (inner_rewrite then_exp ctx),
                   (inner_rewrite else_exp ctx)
                 )
-              | EXPN_let(id, value_exp, body_exp ) ->
+              | EXPN_let(vd, body_exp) ->
+                let (id, ty, value_exp) = vd in
                 EXPN_let(
-                  id,
-                  (inner_rewrite value_exp ctx),
+                  (id, ty, (inner_rewrite value_exp ctx)),
                   (inner_rewrite body_exp ctx)
                 )
               | EXPN_let_rec(var_defs, body_exp ) ->
                 let new_var_defs =
                   var_defs |> List.map
-                    (fun vd -> let (id, value_exp) = vd in
-                      (id, (inner_rewrite value_exp) ctx))
+                    (fun vd -> let (id, ty, value_exp) = vd in
+                      (id, ty, (inner_rewrite value_exp) ctx))
                 in
                 EXPN_let_rec(
-                  new_var_defs, 
+                  new_var_defs,
                   (inner_rewrite body_exp ctx)
                 )
-              | EXPN_func(arg_id, body_exp) -> EXPN_func(
-                  arg_id,
+              | EXPN_func(arg_defs, ret_type, body_exp) -> EXPN_func(
+                  arg_defs,
+                  ret_type,
                   (inner_rewrite body_exp ctx)
                 )
               | EXPN_call(func_exp, arg_exps) -> EXPN_call(

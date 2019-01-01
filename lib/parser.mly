@@ -43,7 +43,7 @@ It looked something like: `%token LET "let"`
 %start <Types.expr_t> prog
 %type <var_def_t> var_def
 %type <type_t> type_spec
-%type <arg_def_t> arg_def
+%type <param_def_t> param_def
 
 %%
 
@@ -65,7 +65,7 @@ var_def:
     { (id, ty, value_exp) }
   ;
 
-arg_def:
+param_def:
   | arg_id = ID; COLON; ty = type_spec
     { (arg_id, ty) }
   ;
@@ -134,6 +134,6 @@ expr:
     { make_node (EXPN_let_rec (var_decls, body_exp)) $startpos }
 
   (* function constructor expression *)
-  | FUNC; LPAREN; func_type = separated_list(COMMA, arg_def); RPAREN; ARROW; ret_type = type_spec; body = expr;
+  | FUNC; LPAREN; func_type = separated_list(COMMA, param_def); RPAREN; ARROW; ret_type = type_spec; body = expr;
     { make_node (EXPN_func(func_type, ret_type, body)) $startpos }
   ;

@@ -18,12 +18,6 @@ let make_src_loc file line_num char_offset = {
   char_offset = char_offset
 }
 
-let dummy_src_loc = {
-  file = "TODO";
-  line_num = -1;
-  char_offset = -1;
-}
-
 type op_t =
   | OP_add
   | OP_sub
@@ -51,7 +45,7 @@ and func_type_t = type_t list * type_t
 and value_t =
   | VAL_bool of bool
   | VAL_int of int
-  (* tuple fields: argument count, function body, captured environment *)
+  (* argument count * function body * captured environment *)
   | VAL_func of int * expr_t * env_t
   (* TODO:  remove VAL_TYPE *)
   | VAL_type of type_t
@@ -66,19 +60,32 @@ and expr_t = {
 }
 
 and expr_node_t =
+  (* variable id *)
   | EXPN_var      of string
+  (* environment offset * variable index *)
   | EXPN_index    of int * int
+  (* literal value *)
   | EXPN_literal  of value_t
+  (* operation * left operand * right operand *)
   | EXPN_binary   of op_t * expr_t * expr_t
+  (* operation * left operand * right operand *)
   | EXPN_logical  of logical_op_t * expr_t * expr_t
+  (* variable definition * let body *)
   | EXPN_let      of var_def_t * expr_t
+  (* list of variable definitions * let body *)
   | EXPN_let_rec  of var_def_t list * expr_t
+  (* condition * then expression * else expression *)
   | EXPN_if       of expr_t * expr_t * expr_t
-  | EXPN_func     of arg_def_t list * type_t * expr_t
+  (* argument definitions * return type * function body *)
+  | EXPN_func     of param_def_t list * type_t * expr_t
+  (* function expression * argument list *)
   | EXPN_call     of expr_t * (expr_t list)
 
+(* variable name * variable type * value expression *)
 and var_def_t = string * type_t * expr_t
-and arg_def_t = string * type_t
+
+(* parameter name * parameter type *)
+and param_def_t = string * type_t
 
 (* TODO: parse_result and interp_result really should have the _t suffix. *)
 (* The result of an attempt to parse a snippet of code. *)

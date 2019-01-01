@@ -32,7 +32,7 @@ let eval e top_env : interp_result =
   let rec inner_eval (e: expr_node_t) (env: env_t) : value_t =
     match e.exp with
     | EXP_var id -> failwith ("Variable '" ^ id ^ "' still existed for some reason")
-    | EXP_index (env_index, var_index) -> apply_env env env_index var_index
+    | EXP_index (env_index, var_index, _) -> apply_env env env_index var_index
     | EXP_literal n -> n
     | EXP_logical(lop, left, right) ->
       begin

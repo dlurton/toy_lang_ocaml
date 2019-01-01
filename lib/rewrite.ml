@@ -11,7 +11,8 @@ let rewrite outer_e (outer_ctx: 'cx) (custom_rewrite: 'cx custom_rewriter_t) =
             exp =
               match e.exp with
               | EXP_var id -> EXP_var(id)
-              | EXP_index (i, j) -> EXP_index(i, j)
+              | EXP_index (env_index, var_index, var_type) ->
+                EXP_index(env_index, var_index, var_type)
               | EXP_literal n -> EXP_literal(n)
               | EXP_logical(lop, left, right) -> EXP_logical(
                   lop,

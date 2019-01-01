@@ -66,8 +66,8 @@ and expr_node_t = {
 and expr_t =
   (* variable id *)
   | EXP_var      of string
-  (* environment offset * variable index *)
-  | EXP_index    of int * int
+  (* environment offset * variable index * variable type *)
+  | EXP_index    of int * int * type_t
   (* literal value *)
   | EXP_literal  of value_t
   (* operation * left operand * right operand *)

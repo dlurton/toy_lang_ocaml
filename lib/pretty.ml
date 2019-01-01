@@ -5,7 +5,11 @@ let rec pretty_string_of_expr e =
   let sprintf = Printf.sprintf in
   match e.exp with
   | EXP_var v -> sprintf "%s" v
-  | EXP_index(env_index, var_index) -> sprintf "|%d %d|" env_index var_index
+  | EXP_index(env_index, var_index, var_type) ->
+    sprintf "|%d %d %s|"
+      env_index
+      var_index
+      (pretty_string_of_type var_type)
   | EXP_literal n ->
     let value_str = pretty_string_of_value n in
     sprintf "%s" value_str

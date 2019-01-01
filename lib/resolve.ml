@@ -29,7 +29,7 @@ let senv_lookup id top_senv =
   search_senv top_senv 0
 
 
-let resolve_rewrite (expr: expr_t) =
+let resolve_rewrite (expr: expr_node_t) =
   let rec inner_resolve_rewrite e senv =
     let new_e = match e.exp with
       (* let evaluates value_exp, then extends the environment

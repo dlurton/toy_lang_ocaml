@@ -1,6 +1,6 @@
 open Types
 
-type ('cx) custom_rewriter_t = expr_t -> 'cx -> expr_t option
+type ('cx) custom_rewriter_t = expr_node_t -> 'cx -> expr_node_t option
 
 let rewrite outer_e (outer_ctx: 'cx) (custom_rewrite: 'cx custom_rewriter_t) =
   let rec inner_rewrite e ctx =

@@ -4,7 +4,7 @@ open Toy_lang.Rewrite
 open Toy_lang.Pretty
 open OUnit2;;
 
-let test_parse (source: string) : expr_t =
+let test_parse (source: string) : expr_node_t =
   let presult = (parse source) in
   match presult with
   | PR_error(loc, msg) -> assert_failure (Printf.sprintf "Parse error: %s %s"

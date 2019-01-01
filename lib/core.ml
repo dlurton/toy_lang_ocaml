@@ -29,7 +29,7 @@ let apply_env env env_index var_index =
 
 (* Evaluates the parsed expression with the specified top-level environment. *)
 let eval e top_env : interp_result =
-  let rec inner_eval (e: expr_t) (env: env_t) : value_t =
+  let rec inner_eval (e: expr_node_t) (env: env_t) : value_t =
     match e.exp with
     | EXPN_var id -> failwith ("Variable '" ^ id ^ "' still existed for some reason")
     | EXPN_index (env_index, var_index) -> apply_env env env_index var_index

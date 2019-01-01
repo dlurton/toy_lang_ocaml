@@ -46,20 +46,24 @@ and value_t =
   | VAL_bool of bool
   | VAL_int of int
   (* argument count * function body * captured environment *)
-  | VAL_func of int * expr_t * env_t
+  | VAL_func of int * expr_node_t * env_t
   (* TODO:  remove VAL_TYPE *)
   | VAL_type of type_t
 
 (* An environment is, for now, simply a list of value_t *)
 and env_t = value_t array list
 
-(* The AST. *)
-and expr_t = {
-  exp : expr_node_t;
+(* Contains an expression and  meta information about it expression
+   such as a line & column informmaation. *)
+and expr_node_t = {
+  exp : expr_t;
   loc : src_loc_t;
 }
 
-and expr_node_t =
+(* Represents an expression.  Child nodes are represented with
+   and instance of expr_node_t, which contains the child expression
+   and its meta-information.  *)
+and expr_t =
   (* variable id *)
   | EXPN_var      of string
   (* environment offset * variable index *)
@@ -67,22 +71,22 @@ and expr_node_t =
   (* literal value *)
   | EXPN_literal  of value_t
   (* operation * left operand * right operand *)
-  | EXPN_binary   of op_t * expr_t * expr_t
+  | EXPN_binary   of op_t * expr_node_t * expr_node_t
   (* operation * left operand * right operand *)
-  | EXPN_logical  of logical_op_t * expr_t * expr_t
+  | EXPN_logical  of logical_op_t * expr_node_t * expr_node_t
   (* variable definition * let body *)
-  | EXPN_let      of var_def_t * expr_t
+  | EXPN_let      of var_def_t * expr_node_t
   (* list of variable definitions * let body *)
-  | EXPN_let_rec  of var_def_t list * expr_t
+  | EXPN_let_rec  of var_def_t list * expr_node_t
   (* condition * then expression * else expression *)
-  | EXPN_if       of expr_t * expr_t * expr_t
+  | EXPN_if       of expr_node_t * expr_node_t * expr_node_t
   (* argument definitions * return type * function body *)
-  | EXPN_func     of param_def_t list * type_t * expr_t
+  | EXPN_func     of param_def_t list * type_t * expr_node_t
   (* function expression * argument list *)
-  | EXPN_call     of expr_t * (expr_t list)
+  | EXPN_call     of expr_node_t * (expr_node_t list)
 
 (* variable name * variable type * value expression *)
-and var_def_t = string * type_t * expr_t
+and var_def_t = string * type_t * expr_node_t
 
 (* parameter name * parameter type *)
 and param_def_t = string * type_t
@@ -91,7 +95,7 @@ and param_def_t = string * type_t
 (* The result of an attempt to parse a snippet of code. *)
 type parse_result =
     PR_error of src_loc_t * string
-  | PR_success of expr_t
+  | PR_success of expr_node_t
 
 (* TODO: Consider splitting this variant type up into semantic_error_t and eval_error_t. *)
 type error_t =

@@ -34,13 +34,13 @@ It looked something like: `%token LET "let"`
 %left ADD SUB
 (*
   TODO: verify that MUL, DIV & MOD operators below should have left associativity,
-  which seems right to me but I read somewhere recently that they should
+  which seems correct to me but I read somewhere recently that they should
   have right associativity instead.
 *)
 %left MUL DIV MOD
 %nonassoc LPAREN
 
-%start <Types.expr_t> prog
+%start <Types.expr_node_t> prog
 %type <var_def_t> var_def
 %type <type_t> type_spec
 %type <param_def_t> param_def
@@ -78,62 +78,62 @@ expr:
      error. *)
 
   (* literals *)
-  | TRUE     { make_node (EXPN_literal(VAL_bool(true))) $startpos}
-  | FALSE    { make_node (EXPN_literal(VAL_bool(false))) $startpos }
-  | i = INT  { make_node (EXPN_literal(VAL_int(i))) $startpos }
+  | TRUE     { make_node (EXP_literal(VAL_bool(true))) $startpos}
+  | FALSE    { make_node (EXP_literal(VAL_bool(false))) $startpos }
+  | i = INT  { make_node (EXP_literal(VAL_int(i))) $startpos }
 
   (* variable reference *)
-  | x = ID { make_node (EXPN_var(x)) $startpos }
+  | x = ID { make_node (EXP_var(x)) $startpos }
 
   (* type *)
   (*| td = type_spec
-    { make_node (EXPN_literal(VAL_type(td))) $startpos }*)
+    { make_node (EXP_literal(VAL_type(td))) $startpos }*)
 
   (* function call *)
   | proc_expr = expr; lp = LPAREN; args = separated_list(COMMA, expr); RPAREN;
-    { make_node (EXPN_call(proc_expr, args)) (lp; $startpos(lp)) }
+    { make_node (EXP_call(proc_expr, args)) (lp; $startpos(lp)) }
 
   (* precedence override *)
   | LPAREN; e = expr; RPAREN { e }
 
   (* binary expressions *)
   | e1 = expr; op = ADD; e2 = expr
-    { make_node (EXPN_binary(OP_add, e1, e2)) (op; $startpos(op)) }
+    { make_node (EXP_binary(OP_add, e1, e2)) (op; $startpos(op)) }
   | e1 = expr; op = SUB; e2 = expr
-    { make_node (EXPN_binary(OP_sub, e1, e2)) (op; $startpos(op)) }
+    { make_node (EXP_binary(OP_sub, e1, e2)) (op; $startpos(op)) }
   | e1 = expr; op = MUL; e2 = expr
-    { make_node (EXPN_binary(OP_mul, e1, e2)) (op; $startpos(op)) }
+    { make_node (EXP_binary(OP_mul, e1, e2)) (op; $startpos(op)) }
   | e1 = expr; op = DIV; e2 = expr
-    { make_node (EXPN_binary(OP_div, e1, e2)) (op; $startpos(op)) }
+    { make_node (EXP_binary(OP_div, e1, e2)) (op; $startpos(op)) }
   | e1 = expr; op = MOD; e2 = expr
-    { make_node (EXPN_binary(OP_mod, e1, e2)) (op; $startpos(op)) }
+    { make_node (EXP_binary(OP_mod, e1, e2)) (op; $startpos(op)) }
   | e1 = expr; op = EQUALS; e2 = expr
-    { make_node (EXPN_binary(OP_eq, e1, e2)) (op; $startpos(op)) }
+    { make_node (EXP_binary(OP_eq, e1, e2)) (op; $startpos(op)) }
   | e1 = expr; op = GT; e2 = expr
-    { make_node (EXPN_binary(OP_gt, e1, e2)) (op; $startpos(op)) }
+    { make_node (EXP_binary(OP_gt, e1, e2)) (op; $startpos(op)) }
   | e1 = expr; op = GTE; e2 = expr
-    { make_node (EXPN_binary(OP_gte, e1, e2)) (op; $startpos(op)) }
+    { make_node (EXP_binary(OP_gte, e1, e2)) (op; $startpos(op)) }
   | e1 = expr; op = LT; e2 = expr
-    { make_node (EXPN_binary(OP_lt, e1, e2)) (op; $startpos(op)) }
+    { make_node (EXP_binary(OP_lt, e1, e2)) (op; $startpos(op)) }
   | e1 = expr; op = LTE; e2 = expr
-    { make_node (EXPN_binary(OP_lte, e1, e2)) (op; $startpos(op)) }
+    { make_node (EXP_binary(OP_lte, e1, e2)) (op; $startpos(op)) }
   | e1 = expr; op = LAND; e2 = expr
-    { make_node (EXPN_logical(LOP_and, e1, e2)) (op; $startpos(op)) }
+    { make_node (EXP_logical(LOP_and, e1, e2)) (op; $startpos(op)) }
   | e1 = expr; op = LOR; e2 = expr
-    { make_node (EXPN_logical(LOP_or, e1, e2)) (op; $startpos(op)) }
+    { make_node (EXP_logical(LOP_or, e1, e2)) (op; $startpos(op)) }
 
   (* if expression *)
   | IF; cond_exp = expr; THEN; then_exp = expr; ELSE; else_exp = expr;
-    { make_node (EXPN_if (cond_exp, then_exp, else_exp)) $startpos }
+    { make_node (EXP_if (cond_exp, then_exp, else_exp)) $startpos }
 
   (* let & let rec expressions *)
   | LET; id = ID; COLON; ty = type_spec; EQUALS; value_exp = expr; IN; body_exp = expr
-    { make_node (EXPN_let ((id, ty, value_exp), body_exp)) $startpos }
+    { make_node (EXP_let ((id, ty, value_exp), body_exp)) $startpos }
   | LET; REC; var_decls = separated_nonempty_list(AND, var_def);
     IN; body_exp = expr
-    { make_node (EXPN_let_rec (var_decls, body_exp)) $startpos }
+    { make_node (EXP_let_rec (var_decls, body_exp)) $startpos }
 
   (* function constructor expression *)
   | FUNC; LPAREN; func_type = separated_list(COMMA, param_def); RPAREN; ARROW; ret_type = type_spec; body = expr;
-    { make_node (EXPN_func(func_type, ret_type, body)) $startpos }
+    { make_node (EXP_func(func_type, ret_type, body)) $startpos }
   ;

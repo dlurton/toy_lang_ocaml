@@ -35,10 +35,10 @@ let resolve_rewrite (expr: expr_node_t) =
       (* let evaluates value_exp, then extends the environment
          with the result, and executes body_exp under this
          extended environment *)
-      | EXPN_let(vd, body_exp) ->
+      | EXP_let(vd, body_exp) ->
         let (id, ty, value_exp) = vd in
         let let_senv = extend_senv [id] senv in
-        Some(EXPN_let(
+        Some(EXP_let(
           (id, ty, (rewrite value_exp senv inner_resolve_rewrite)),
           (rewrite body_exp let_senv inner_resolve_rewrite)
         ))
@@ -46,7 +46,7 @@ let resolve_rewrite (expr: expr_node_t) =
          and body_exp in the extended environment so that
          value_exp has access to the variable being defined.
          let rec also supports multiple variable definitions. *)
-      | EXPN_let_rec(var_defs, body_exp) ->
+      | EXP_let_rec(var_defs, body_exp) ->
         let ids = var_defs |> List.map (fun vd -> let (id, _, _) = vd in id) in
         let let_senv = extend_senv ids senv in
         let new_var_defs =
@@ -55,23 +55,23 @@ let resolve_rewrite (expr: expr_node_t) =
                let (id, ty, value_exp) = vd in
                (id, ty, (rewrite value_exp let_senv inner_resolve_rewrite)))
         in
-        Some(EXPN_let_rec(
+        Some(EXP_let_rec(
             new_var_defs,
             (rewrite body_exp let_senv inner_resolve_rewrite)
           ))
-      | EXPN_func(arg_defs, ret_type, body_exp) ->
+      | EXP_func(arg_defs, ret_type, body_exp) ->
         let ids = arg_defs |> List.map (fun vd -> let (id, _) = vd in id) in
         let arg_senv = extend_senv ids senv in
-        Some(EXPN_func(
+        Some(EXP_func(
             arg_defs,
             ret_type,
             (rewrite body_exp arg_senv inner_resolve_rewrite)))
-      | EXPN_index _ -> failwith "This AST already has at least one index."
-      | EXPN_var id ->
+      | EXP_index _ -> failwith "This AST already has at least one index."
+      | EXP_var id ->
         begin
           match senv_lookup id senv with
           | None -> raise (InterpExn(e.loc, ERR_unbound_var(id)))
-          | Some (e_index, v_index) -> Some(EXPN_index(e_index, v_index))
+          | Some (e_index, v_index) -> Some(EXP_index(e_index, v_index))
         end
       | _ -> None
     in

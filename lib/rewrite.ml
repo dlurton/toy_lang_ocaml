@@ -10,46 +10,46 @@ let rewrite outer_e (outer_ctx: 'cx) (custom_rewrite: 'cx custom_rewriter_t) =
             loc = e.loc;
             exp =
               match e.exp with
-              | EXPN_var id -> EXPN_var(id)
-              | EXPN_index (i, j) -> EXPN_index(i, j)
-              | EXPN_literal n -> EXPN_literal(n)
-              | EXPN_logical(lop, left, right) -> EXPN_logical(
+              | EXP_var id -> EXP_var(id)
+              | EXP_index (i, j) -> EXP_index(i, j)
+              | EXP_literal n -> EXP_literal(n)
+              | EXP_logical(lop, left, right) -> EXP_logical(
                   lop,
                   (inner_rewrite left ctx),
                   (inner_rewrite right ctx)
                 )
-              | EXPN_binary(op, left, right) -> EXPN_binary(
+              | EXP_binary(op, left, right) -> EXP_binary(
                   op,
                   (inner_rewrite left ctx),
                   (inner_rewrite right ctx)
                 )
-              | EXPN_if(cond_exp, then_exp, else_exp) -> EXPN_if(
+              | EXP_if(cond_exp, then_exp, else_exp) -> EXP_if(
                   (inner_rewrite cond_exp ctx),
                   (inner_rewrite then_exp ctx),
                   (inner_rewrite else_exp ctx)
                 )
-              | EXPN_let(vd, body_exp) ->
+              | EXP_let(vd, body_exp) ->
                 let (id, ty, value_exp) = vd in
-                EXPN_let(
+                EXP_let(
                   (id, ty, (inner_rewrite value_exp ctx)),
                   (inner_rewrite body_exp ctx)
                 )
-              | EXPN_let_rec(var_defs, body_exp ) ->
+              | EXP_let_rec(var_defs, body_exp ) ->
                 let new_var_defs =
                   var_defs |> List.map
                     (fun vd -> let (id, ty, value_exp) = vd in
                       (id, ty, (inner_rewrite value_exp) ctx))
                 in
-                EXPN_let_rec(
+                EXP_let_rec(
                   new_var_defs,
                   (inner_rewrite body_exp ctx)
                 )
-              | EXPN_func(arg_defs, ret_type, body_exp) -> EXPN_func(
+              | EXP_func(arg_defs, ret_type, body_exp) -> EXP_func(
                   arg_defs,
                   ret_type,
                   (inner_rewrite body_exp ctx)
                 )
-              | EXPN_call(func_exp, arg_exps) -> EXPN_call(
+              | EXP_call(func_exp, arg_exps) -> EXP_call(
                   (inner_rewrite func_exp ctx),
                   arg_exps |> List.map (fun e -> inner_rewrite e ctx)
                 )

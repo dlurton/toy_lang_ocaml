@@ -65,25 +65,25 @@ and expr_node_t = {
    and its meta-information.  *)
 and expr_t =
   (* variable id *)
-  | EXPN_var      of string
+  | EXP_var      of string
   (* environment offset * variable index *)
-  | EXPN_index    of int * int
+  | EXP_index    of int * int
   (* literal value *)
-  | EXPN_literal  of value_t
+  | EXP_literal  of value_t
   (* operation * left operand * right operand *)
-  | EXPN_binary   of op_t * expr_node_t * expr_node_t
+  | EXP_binary   of op_t * expr_node_t * expr_node_t
   (* operation * left operand * right operand *)
-  | EXPN_logical  of logical_op_t * expr_node_t * expr_node_t
+  | EXP_logical  of logical_op_t * expr_node_t * expr_node_t
   (* variable definition * let body *)
-  | EXPN_let      of var_def_t * expr_node_t
+  | EXP_let      of var_def_t * expr_node_t
   (* list of variable definitions * let body *)
-  | EXPN_let_rec  of var_def_t list * expr_node_t
+  | EXP_let_rec  of var_def_t list * expr_node_t
   (* condition * then expression * else expression *)
-  | EXPN_if       of expr_node_t * expr_node_t * expr_node_t
+  | EXP_if       of expr_node_t * expr_node_t * expr_node_t
   (* argument definitions * return type * function body *)
-  | EXPN_func     of param_def_t list * type_t * expr_node_t
+  | EXP_func     of param_def_t list * type_t * expr_node_t
   (* function expression * argument list *)
-  | EXPN_call     of expr_node_t * (expr_node_t list)
+  | EXP_call     of expr_node_t * (expr_node_t list)
 
 (* variable name * variable type * value expression *)
 and var_def_t = string * type_t * expr_node_t

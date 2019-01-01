@@ -4,19 +4,19 @@ open Printf
 let rec pretty_string_of_expr e =
   let sprintf = Printf.sprintf in
   match e.exp with
-  | EXPN_var v -> sprintf "%s" v
-  | EXPN_index(env_index, var_index) -> sprintf "|%d %d|" env_index var_index
-  | EXPN_literal n ->
+  | EXP_var v -> sprintf "%s" v
+  | EXP_index(env_index, var_index) -> sprintf "|%d %d|" env_index var_index
+  | EXP_literal n ->
     let value_str = pretty_string_of_value n in
     sprintf "%s" value_str
-  | EXPN_logical(lop, l, r) ->
+  | EXP_logical(lop, l, r) ->
     sprintf "(%s) %s (%s)"
       (pretty_string_of_expr l)
       (match lop with
       | LOP_and   -> "&&"
       | LOP_or    -> "||")
       (pretty_string_of_expr r)
-  | EXPN_binary(op, l, r) ->
+  | EXP_binary(op, l, r) ->
     sprintf " (%s) %s (%s) "
       (pretty_string_of_expr l)
       (match op with
@@ -31,27 +31,27 @@ let rec pretty_string_of_expr e =
       | OP_lt     -> "<"
       | OP_lte    -> "<=")
       (pretty_string_of_expr r)
-  | EXPN_if(c, t, e) ->
+  | EXP_if(c, t, e) ->
     sprintf "if %s then %s else %s"
       (pretty_string_of_expr c)
       (pretty_string_of_expr t)
       (pretty_string_of_expr e)
-  | EXPN_let(var_def, body_exp) ->
+  | EXP_let(var_def, body_exp) ->
     sprintf "let %s in %s"
       (pretty_string_of_var_def var_def)
       (pretty_string_of_expr body_exp)
-  | EXPN_let_rec(var_defs, body_exp) ->
+  | EXP_let_rec(var_defs, body_exp) ->
     let var_def_strs =
       var_defs |> List.map (fun vd -> pretty_string_of_var_def vd)
     in
     sprintf "let rec %s in %s"
       (String.concat " and " var_def_strs)
       (pretty_string_of_expr body_exp)
-  | EXPN_call(func_exp, arg_exps) ->
+  | EXP_call(func_exp, arg_exps) ->
     sprintf "%s(%s)"
       (pretty_string_of_expr func_exp)
       (String.concat " " (List.map (fun e -> pretty_string_of_expr e) arg_exps))
-  | EXPN_func(arg_defs, ret_type, body_exp) ->
+  | EXP_func(arg_defs, ret_type, body_exp) ->
     sprintf "func(%s) -> %s %s"
       (String.concat ", "
          (arg_defs |> List.map

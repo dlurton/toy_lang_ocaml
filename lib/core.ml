@@ -31,10 +31,10 @@ let apply_env env env_index var_index =
 let eval e top_env : interp_result =
   let rec inner_eval (e: expr_node_t) (env: env_t) : value_t =
     match e.exp with
-    | EXPN_var id -> failwith ("Variable '" ^ id ^ "' still existed for some reason")
-    | EXPN_index (env_index, var_index) -> apply_env env env_index var_index
-    | EXPN_literal n -> n
-    | EXPN_logical(lop, left, right) ->
+    | EXP_var id -> failwith ("Variable '" ^ id ^ "' still existed for some reason")
+    | EXP_index (env_index, var_index) -> apply_env env env_index var_index
+    | EXP_literal n -> n
+    | EXP_logical(lop, left, right) ->
       begin
         let eval_bool expr = match inner_eval expr env with
           | VAL_bool b -> b
@@ -60,7 +60,7 @@ let eval e top_env : interp_result =
               VAL_bool(true)
           end
       end
-    | EXPN_binary(op, left, right) ->
+    | EXP_binary(op, left, right) ->
       let values = ((inner_eval left env), (inner_eval right env)) in
       let binary_int_op (func: int * int -> value_t) =
         begin
@@ -92,7 +92,7 @@ let eval e top_env : interp_result =
         | OP_lt   -> binary_int_op (fun (l, r) -> VAL_bool(l < r))
         | OP_lte  -> binary_int_op (fun (l, r) -> VAL_bool(l <= r))
       end
-    | EXPN_if(cond_exp, then_exp, else_exp) ->
+    | EXP_if(cond_exp, then_exp, else_exp) ->
       let cond_val = inner_eval cond_exp env in
       begin
         match cond_val with
@@ -100,12 +100,12 @@ let eval e top_env : interp_result =
         | VAL_bool(false) -> inner_eval else_exp env
         | _ -> raise (InterpExn(cond_exp.loc, ERR_if_cond_not_bool))
       end
-    | EXPN_let(var_def, body_exp ) ->
+    | EXP_let(var_def, body_exp ) ->
         let (_, _, value_exp) = var_def in 
         let the_value = inner_eval value_exp env in
         let nested_env = extend_env env [|the_value|] in
         inner_eval body_exp nested_env
-    | EXPN_let_rec(var_defs, body_exp) ->
+    | EXP_let_rec(var_defs, body_exp) ->
       let future_vals = Array.make (List.length var_defs) (VAL_int(0)) in
       let nested_env = extend_env env future_vals in
         var_defs |> List.iteri
@@ -115,8 +115,8 @@ let eval e top_env : interp_result =
              Array.set future_vals i value
           ); 
         inner_eval body_exp nested_env
-    | EXPN_func(ids, _, body_exp) -> VAL_func((List.length ids), body_exp, env)
-    | EXPN_call(func_exp, arg_exps) ->
+    | EXP_func(ids, _, body_exp) -> VAL_func((List.length ids), body_exp, env)
+    | EXP_call(func_exp, arg_exps) ->
       let proc_val = inner_eval func_exp env in
       begin
         match proc_val with

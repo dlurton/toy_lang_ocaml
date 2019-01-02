@@ -2,7 +2,17 @@ open Types
 
 type ('cx) custom_rewriter_t = expr_node_t -> 'cx -> expr_node_t option
 
-let rewrite outer_e (outer_ctx: 'cx) (custom_rewrite: 'cx custom_rewriter_t) =
+(*
+   Rewrites an expression.
+
+   custom_rewrite is invoked and if None is returned, then applies a
+   default cloning rewrite to the node.
+
+   rewrite context is any "context" that is neede for the custom rewrite,
+   such as a static environment.
+
+*)
+let rewrite expr_node (rewrite_context: 'cx) (custom_rewrite: 'cx custom_rewriter_t) =
   let rec inner_rewrite e ctx =
     match custom_rewrite e ctx with
         | Some (new_e) -> new_e
@@ -56,7 +66,7 @@ let rewrite outer_e (outer_ctx: 'cx) (custom_rewrite: 'cx custom_rewriter_t) =
                 )
           }
   in
-  inner_rewrite outer_e outer_ctx
+  inner_rewrite expr_node rewrite_context
 
 let default_rewrite e =
   rewrite e () (fun _ _ -> None)

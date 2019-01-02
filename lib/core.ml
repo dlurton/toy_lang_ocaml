@@ -101,7 +101,7 @@ let eval e top_env : interp_result =
         | _ -> raise (InterpExn(cond_exp.loc, ERR_if_cond_not_bool))
       end
     | EXP_let(var_def, body_exp ) ->
-        let (_, _, value_exp) = var_def in 
+        let (_, _, value_exp) = var_def in
         let the_value = inner_eval value_exp env in
         let nested_env = extend_env env [|the_value|] in
         inner_eval body_exp nested_env
@@ -113,7 +113,7 @@ let eval e top_env : interp_result =
              let (_, _, value_exp) = vd in
              let value = inner_eval value_exp nested_env in
              Array.set future_vals i value
-          ); 
+          );
         inner_eval body_exp nested_env
     | EXP_func(ids, _, body_exp) -> VAL_func((List.length ids), body_exp, env)
     | EXP_call(func_exp, arg_exps) ->
@@ -136,6 +136,7 @@ let eval e top_env : interp_result =
   in
   try
     let resolved_exp = e |> Resolve.resolve_rewrite in
+    ignore (Check.type_of_exp resolved_exp);
     IR_success(inner_eval resolved_exp top_env)
   with InterpExn (loc, msg) ->
     IR_error(loc, msg)

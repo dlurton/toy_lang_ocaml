@@ -34,7 +34,7 @@ and type_of_exp node : type_t =
       let actual_t = type_of_exp node in
       match actual_t with
       | TY_bool -> () (* do nothing, it's ok *)
-      | _ -> raise (InterpExn(node.loc, ERR_expected_int(actual_t)))
+      | _ -> raise (InterpExn(node.loc, ERR_expected_bool(actual_t)))
     end in
 (* TODO: DRY *)
   let check_is_int node =

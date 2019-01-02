@@ -75,7 +75,7 @@ and pretty_string_of_type = function
   | TY_int -> "int"
   | TY_bool -> "bool"
   | TY_func (arg_types, ret_type) ->
-    sprintf "(%s): %s"
+    sprintf "(%s -> %s)"
       (String.concat ", " (arg_types |> List.map (fun t -> pretty_string_of_type t)))
       (pretty_string_of_type ret_type)
 and pretty_string_of_var_def vd =

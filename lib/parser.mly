@@ -56,7 +56,7 @@ type_spec:
     { TY_int }
   | BOOL_TYPE;
     { TY_bool }
-  | LPAREN; arg_types = separated_list(COMMA, type_spec); RPAREN; ARROW ret_type = type_spec;
+  | LPAREN; arg_types = separated_list(COMMA, type_spec); ARROW; ret_type = type_spec; RPAREN;
     { TY_func(arg_types, ret_type) }
   ;
 
@@ -134,6 +134,6 @@ expr:
     { make_node (EXP_let_rec (var_decls, body_exp)) $startpos }
 
   (* function constructor expression *)
-  | FUNC; LPAREN; func_type = separated_list(COMMA, param_def); RPAREN; ARROW; ret_type = type_spec; body = expr;
+  | FUNC; LPAREN; func_type = separated_list(COMMA, param_def); ARROW; ret_type = type_spec; RPAREN; ARROW; body = expr;
     { make_node (EXP_func(func_type, ret_type, body)) $startpos }
   ;

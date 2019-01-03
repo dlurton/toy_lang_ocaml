@@ -54,9 +54,13 @@ let suite = "toy_lang_suite" >:::
               "binary_lte_int_2_2">::expect_bool true "2 <= 2";
               "binary_lte_int_2_3">::expect_bool true "2 <= 3";
 
+              (* integer comparison errors *)
               "binary_eq_mixed_1">::expect_error 1 3 (ERR_type_mismatch(TY_int, TY_bool)) "1 = true";
-              "binary_eq_mixed_2">::expect_error 1 6 (ERR_type_mismatch(TY_bool, TY_int)) "true = 1";
-              (* TODO: should function equality be supported or should it just be a error? *)
+              "binary_eq_mixed_2">::expect_error 1 6 (ERR_tpe_mismatch(TY_bool, TY_int)) "true = 1";
+              (* TODO: should function equality be supported or should it just be a error?
+                 currently, all attempts to check equality of variables referencing functions
+                 result in false.  This should probably be an error until we support it
+                 properly. *)
 
               (* logical operators *)
               "and_1">::expect_bool true "true && true";

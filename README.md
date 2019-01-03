@@ -92,7 +92,6 @@ OCAML toy language REPL - type "?exit" to exit
 
 ## TODO
 
-- Mutually recursive functions, i.e. `let rec x = ... and y = xxx`
 - A foreign function interface to OCaml
 - Add the language features of your choice.
 
@@ -121,4 +120,6 @@ Then, you can examine the file `lib/parser.conflicts` to read about the first sh
 - [opam packaging](https://opam.ocaml.org/doc/Packaging.html) (Describies files like `toy_lang.opam`)
 - [Starting a new project with dune](https://medium.com/@bobbypriambodo/starting-an-ocaml-app-project-using-dune-d4f74e291de8)
 - [Testing with dune](https://jbuilder.readthedocs.io/en/latest/tests.html)
+- [ppx_compare](https://github.com/janestreet/ppx_compare) (Not used by this project--yet.  It might become
+useful if a situation arises where `expr_node_t` needs to be compared while ignoring its `src_loc_t`.
 

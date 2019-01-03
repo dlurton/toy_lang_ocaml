@@ -158,7 +158,7 @@ let suite = "toy_lang_suite" >:::
               "if_nested_4">::expect_int 2 "if false then -1 else if false then 1 else 2";
 
               (* if errors *)
-              "if_cond_not_bool">::expect_error 1 4 ERR_if_cond_not_bool "if 1 then 1 else 2";
+              "if_cond_not_bool">::expect_error 1 4 (ERR_expected_bool(TY_int)) "if 1 then 1 else 2";
 
               (* let *)
               "let_1">::expect_int 99 "let x:int = 99 in x";

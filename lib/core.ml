@@ -38,9 +38,9 @@ let eval e top_env : interp_result =
       begin
         let eval_bool expr = match inner_eval expr env with
           | VAL_bool b -> b
-          | _ -> raise (InterpExn(expr.loc, ERR_logical_operand_not_bool))
+          | _ -> raise (InterpExn(expr.loc, (ERR_internal("logical operand not bool"))))
         in
-        match lop with 
+        match lop with
         | LOP_and ->
           begin
             let lval = eval_bool left in
@@ -69,7 +69,7 @@ let eval e top_env : interp_result =
           | (VAL_int lval, VAL_int rval) -> func(lval, rval)
           | _ ->
             (* we have a non-integer somewhere *)
-            raise (InterpExn(e.loc, ERR_arithmetic_on_non_number))
+            raise (InterpExn(e.loc, ERR_internal("arithmetic on non-number")))
         end in
       begin
         match op with
@@ -98,7 +98,7 @@ let eval e top_env : interp_result =
         match cond_val with
         | VAL_bool(true) -> inner_eval then_exp env
         | VAL_bool(false) -> inner_eval else_exp env
-        | _ -> raise (InterpExn(cond_exp.loc, ERR_if_cond_not_bool))
+        | _ -> raise (InterpExn(e.loc, (ERR_internal("if cond not bool"))))
       end
     | EXP_let(var_def, body_exp ) ->
         let (_, _, value_exp) = var_def in
@@ -123,15 +123,13 @@ let eval e top_env : interp_result =
         | VAL_func(expected_arg_count, body_exp, captured_env) ->
           let actual_arg_count = (List.length arg_exps) in
           if expected_arg_count <> actual_arg_count then
-            raise (InterpExn(
-                e.loc,
-                (ERR_incorrect_arg_count(expected_arg_count, actual_arg_count))))
+            raise (InterpExn(e.loc, ERR_internal("incorrect arg count")))
           else
             let arg_values = Array.of_list (List.map (fun e -> inner_eval e env) arg_exps)
             in
             let call_env = extend_env captured_env arg_values in
             inner_eval body_exp call_env
-        | _ -> raise (InterpExn(e.loc, ERR_invoked_non_func))
+        | _ -> raise (InterpExn(e.loc, (ERR_internal("invoked non func"))))
       end
   in
   try
@@ -154,7 +152,7 @@ let parse s =
   with LexicalExn(src_loc, msg) ->
     PR_error(src_loc, "Lexical error: " ^ msg)
      | Parser.Error ->
-       let sloc = Util.src_loc_of_position lexbuf.lex_curr_p in 
+       let sloc = Util.src_loc_of_position lexbuf.lex_curr_p in
        PR_error(sloc, "Syntax error near this position")
 
 

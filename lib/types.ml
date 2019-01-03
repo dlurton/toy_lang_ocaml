@@ -97,24 +97,23 @@ type parse_result =
     PR_error of src_loc_t * string
   | PR_success of expr_node_t
 
-(* TODO: Consider splitting this variant type up into semantic_error_t and eval_error_t. *)
+(* All of these errors except for ERR_internal should only ever be raised
+   before evaluation-time. *)
 type error_t =
-  | ERR_unbound_var of string (* can only happen during the resolve rewrite. *)
+  | ERR_internal of string
+  | ERR_unbound_var of string
   | ERR_expected_bool of type_t
   | ERR_expected_int of type_t
-  | ERR_type_mismatch of type_t * type_t 
-  | ERR_if_cond_not_bool (* TODO:  remove this *)
-  | ERR_logical_operand_not_bool (* TODO: remove this *)
-  | ERR_if_branch_type_mismatch (* TODO: remove this *)
+  | ERR_type_mismatch of type_t * type_t
+  | ERR_if_branch_type_mismatch
   | ERR_cannot_call_non_func
-  | ERR_invoked_non_func (* TODO: remove *)
-  | ERR_arithmetic_on_non_number
   | ERR_div_0
   | ERR_incorrect_arg_count of int * int
   | ERR_arg_type_mismatch of int * type_t * type_t
 
 let string_of_error err =
   match err with
+  | ERR_internal(msg) -> Printf.sprintf "internal error: %s" msg
   | ERR_unbound_var id -> Printf.sprintf "unbound variable '%s'" id
   | ERR_expected_bool _ ->
     (* TODO: include the actual type in this error message--currently can't because of dependency cycle *)
@@ -125,13 +124,9 @@ let string_of_error err =
   | ERR_type_mismatch (_, _) ->
     (* TODO: include the actual types in this error message--currently can't because of dependency cycle *)
     "Type mismatch"
-  | ERR_if_cond_not_bool -> "if condition was not a bool value"
   | ERR_if_branch_type_mismatch -> "Both branches of if expression must have the same type"
-  | ERR_logical_operand_not_bool -> "operand to logical operator was not a boolean value"
   | ERR_cannot_call_non_func -> "Value is not a function"
-  | ERR_invoked_non_func -> "cannot call a value that is not a function"
   | ERR_div_0 -> "divide by zero"
-  | ERR_arithmetic_on_non_number -> "attempted to perform arithmetic on a value that was not a number"
   | ERR_incorrect_arg_count(expected, actual) ->
     Printf.sprintf "function expected %d argument(s) but %d were supplied" expected actual
   | ERR_arg_type_mismatch (arg_num, _, _) ->
@@ -150,4 +145,3 @@ exception LexicalExn of src_loc_t * string
 
 (* Exception thrown by the interpreter when an error is encountered. *)
 exception InterpExn of src_loc_t * error_t
-

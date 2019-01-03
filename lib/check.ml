@@ -83,7 +83,8 @@ and type_of_exp node : type_t =
         (* TODO: Do we care about function equality? What does that even mean? *)
         TY_bool
     end
-  | EXP_if(_, then_exp, else_exp) ->
+  | EXP_if(cond_exp, then_exp, else_exp) ->
+    check_is_bool cond_exp;
     let then_ty = type_of_exp then_exp in
     let else_ty = type_of_exp else_exp in
     if then_ty <> else_ty then

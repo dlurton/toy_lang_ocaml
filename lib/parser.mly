@@ -85,10 +85,6 @@ expr:
   (* variable reference *)
   | x = ID { make_node (EXP_var(x)) $startpos }
 
-  (* type *)
-  (*| td = type_spec
-    { make_node (EXP_literal(VAL_type(td))) $startpos }*)
-
   (* function call *)
   | proc_expr = expr; lp = LPAREN; args = separated_list(COMMA, expr); RPAREN;
     { make_node (EXP_call(proc_expr, args)) (lp; $startpos(lp)) }

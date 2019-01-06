@@ -4,7 +4,7 @@ open Toy_lang.Rewrite
 open Toy_lang.Pretty
 open OUnit2;;
 
-let test_parse (source: string) : expr_t =
+let test_parse (source: string) : expr_node_t =
   let presult = (parse source) in
   match presult with
   | PR_error(loc, msg) -> assert_failure (Printf.sprintf "Parse error: %s %s"
@@ -28,26 +28,31 @@ let test_eval (s: string) : value_t =
   | IR_success r -> r
 
 let value_to_int = function
-   | VAL_i32 i -> i
+   | VAL_int i -> i
    | _ -> assert_failure "Result of the function was not an int"
 
 let value_to_bool = function
    | VAL_bool b -> b
    | _ -> assert_failure "Result of the function was not a bool"
 
+let value_to_type = function
+  | VAL_type t -> t
+   | _ -> assert_failure "Result of the function was not a type"
+
 let eval_int src = value_to_int (test_eval src)
 let eval_bool src = value_to_bool (test_eval src)
+let eval_type src = value_to_type (test_eval src)
 
 let expect_int expected_result source =
   (fun _ ->
       let result = eval_int source in
       assert_equal expected_result result ~printer:string_of_int)
-(* TODO: DRY *)
+
 let expect_bool expected_result source =
   (fun _ ->
       let result = eval_bool source in
-      assert_equal expected_result result)
-
+      assert_equal expected_result result ~printer:string_of_bool)
+      
 let expect_error expected_line_num expected_char_offset expected_error source =
   (fun _ -> let exp = test_parse source in
      let iresult = eval exp empty_env in

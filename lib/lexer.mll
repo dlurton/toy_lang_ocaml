@@ -31,6 +31,7 @@ rule read =
   | single_line_comment { read lexbuf }
   | multi_line_comment  { read lexbuf }
   | ","                 { COMMA }
+  | ":"                 { COLON }
   | "+"                 { ADD }
   | "-"                 { SUB }
   | "*"                 { MUL }
@@ -42,13 +43,15 @@ rule read =
   | "rec"               { REC }
   | "and"               { AND }
   | "->"                { ARROW }
+  | "int"               { INT_TYPE }
+  | "bool"              { BOOL_TYPE }
   | "func"              { FUNC }
   | "="                 { EQUALS }
   | ">"                 { GT }
   | ">="                { GTE }
   | "<"                 { LT }
   | "<="                { LTE }
-  | "&&"                { LAND } 
+  | "&&"                { LAND }
   | "||"                { LOR }
   | "in"                { IN }
   | "true"              { TRUE }

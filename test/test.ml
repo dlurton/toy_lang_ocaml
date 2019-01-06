@@ -54,10 +54,13 @@ let suite = "toy_lang_suite" >:::
               "binary_lte_int_2_2">::expect_bool true "2 <= 2";
               "binary_lte_int_2_3">::expect_bool true "2 <= 3";
 
-              (* mixed type equality (TODO: should these really be errors instead of evaluating to false?) *)
-              "binary_eq_mixed_1">::expect_bool false "1 = true";
-              "binary_eq_mixed_2">::expect_bool false "true = 1";
-              (* TODO: should function equality be supported or should it just be a error? *)
+              (* integer comparison errors *)
+              "binary_eq_mixed_1">::expect_error 1 3 (ERR_type_mismatch(TY_int, TY_bool)) "1 = true";
+              "binary_eq_mixed_2">::expect_error 1 6 (ERR_type_mismatch(TY_bool, TY_int)) "true = 1";
+              (* TODO: should function equality be supported or should it just be a error?
+                 currently, all attempts to check equality of variables referencing functions
+                 result in false.  This should probably be an error until we support it
+                 properly. *)
 
               (* logical operators *)
               "and_1">::expect_bool true "true && true";
@@ -71,15 +74,11 @@ let suite = "toy_lang_suite" >:::
               "or_4">::expect_bool false "false && false";
 
               (* logical operator errors *)
-              "and_not_bool_1">::expect_error 1 1 ERR_logical_operand_not_bool "1 && true";
-              "and_not_bool_2">::expect_error 1 9 ERR_logical_operand_not_bool "true && 1";
-              (* note: short circuiting prevents right side from being evaluated *)
-              "and_not_bool_3">::expect_bool false "false && 1";
+              "and_not_bool_1">::expect_error 1 1 (ERR_expected_bool(TY_int)) "1 && true";
+              "and_not_bool_2">::expect_error 1 9 (ERR_expected_bool(TY_int)) "true && 1";
 
-              "or_not_bool_1">::expect_error 1 1  ERR_logical_operand_not_bool "1 || true";
-              "or_not_bool_2">::expect_error 1 10 ERR_logical_operand_not_bool "false || 1";
-              (* note: short circuiting prevents right side from being evaluated *)
-              "or_not_bool_3">::expect_bool true "true || 1";
+              "or_not_bool_1">::expect_error 1 1  (ERR_expected_bool(TY_int)) "1 || true";
+              "or_not_bool_2">::expect_error 1 10 (ERR_expected_bool(TY_int)) "false || 1";
 
               (* integer arithmetic *)
               "binary_add_1">::expect_int 10 "8 + 2";
@@ -146,9 +145,9 @@ let suite = "toy_lang_suite" >:::
               "binary_order_of_operations_7">::expect_int 4 "14 * 2 % 10 / 2"; (* % same as * and / *)
 
               (* arithmetic errors *)
-              "binary_add_int_bool">::expect_error 1 3 ERR_arithmetic_on_non_number "1 + true";
-              "binary_add_bool_int">::expect_error 1 6 ERR_arithmetic_on_non_number "true + 1";
-              "binary_add_bool_bool">::expect_error 1 6 ERR_arithmetic_on_non_number "true + true";
+              "binary_add_int_bool">::expect_error 1 5 (ERR_expected_int(TY_bool)) "1 + true";
+              "binary_add_bool_int">::expect_error 1 1 (ERR_expected_int(TY_bool)) "true + 1";
+              "binary_add_bool_bool">::expect_error 1 1 (ERR_expected_int(TY_bool)) "true + true";
 
               (* if *)
               "if_1">::expect_int 1 "if true then 1 else 2";
@@ -163,25 +162,54 @@ let suite = "toy_lang_suite" >:::
               "if_nested_4">::expect_int 2 "if false then -1 else if false then 1 else 2";
 
               (* if errors *)
-              "if_cond_not_bool">::expect_error 1 4 ERR_if_cond_not_bool "if 1 then 1 else 2";
+              "if_cond_not_bool">::expect_error 1 4 (ERR_expected_bool(TY_int)) "if 1 then 1 else 2";
 
               (* let *)
-              "let_1">::expect_int 99 "let x = 99 in x";
-              "let_shadow_1">::expect_int 101 "let x = 99 in let x = 101 in x";
-              "let_shadow_2">::expect_int 102 "let x = 99 in let x = 101 in x + 1";
+              "let_1">::expect_int 99 "let x:int = 99 in x";
+              "let_shadow_1">::expect_int 101 "let x:int = 99 in let x:int = 101 in x";
+              "let_shadow_2">::expect_int 102 "let x:int = 99 in let x:int = 101 in x + 1";
 
+              (* func *)
+              "func_zero_arg">::expect_int 11 "(func(-> int) -> 11)()";
+              "func_single_arg">::expect_int 1 "(func(x:int -> int) -> x)(1)";
+              "func_two_args_1">::expect_int 1 "(func(x:int, y:int -> int) -> x)(1, 2)";
+              "func_two_args_2">::expect_int 2 "(func (x:int, y:int -> int) -> y)(1, 2)";
+              "func_three_args_1">::expect_int 1 "(func(x:int, y:int, z:int -> int) -> x)(1, 2, 3)";
+              "func_three_args_2">::expect_int 2 "(func (x:int, y:int, z:int -> int) -> y)(1, 2, 3)";
+              "func_three_args_3">::expect_int 3 "(func (x:int, y:int, z:int -> int) -> z)(1, 2, 3)";
+              "func_with_exp_1">::expect_int 22 "(func (x:int -> int) -> x + 1)(21)";
+              "func_with_exp_2">::expect_int 32 "(func (x:int, y:int -> int) -> x + y)(10 ,22)";
+              "func_with_exp_3">::expect_int 13 "(func (x:int, y:int, z:int -> int) -> x + y * z)(3, 2, 5)";
+              "func_dup_arg_names">::expect_int 3 "(func (x:int, x:int -> int) -> x)(3, 2)";
+              "func_as_arg">::expect_int 22 "(func(f:(int -> int) -> int) -> f(21))(func(x:int -> int) -> x + 1)";
+              "func_returned">::expect_int 22 "(func(x:int -> (int -> int)) -> func(y:int -> int) -> x + y)(10)(12)";
+              "func_in_let">::expect_int 22 "let f:(int -> (int -> int)) = func(x:int -> (int -> int)) -> func(y:int -> int) -> x + y in f(10)(12)";
+
+              (* func errors *)
+              "func_call_non_func">::expect_error 1 1 ERR_cannot_call_non_func "1(1)";
+              "func_call_wrong_num_args_0_1">::expect_error
+                1 22 (ERR_incorrect_arg_count(0, 1)) "(func ( -> int) -> 1)(1)";
+              "func_call_wrong_num_args_2_0">::expect_error
+                1 34 (ERR_incorrect_arg_count(2, 0)) "(func (x:int, y:int -> int) -> 1)()";
+              "func_call_wrong_num_args_2_3">::expect_error
+                1 34 (ERR_incorrect_arg_count(2, 3)) "(func (x:int, y:int -> int) -> 1)(1, 2, 3)";
+
+
+              (* the y-combinator, just because *)
+              (* TODO, here's an example: https://rosettacode.org/wiki/Y_combinator#OCaml *)
+ 
               (* let rec *)
               "let_rec_nested_func">::expect_int 100 "
-let f = func factor ->
-  let rec sum = func n ->
+let f:(int -> int) = func(factor:int -> int) ->
+  let rec sum:(int -> int) = func(n:int -> int) ->
     if n = 0 then 0 else 10 + sum(n - 1)
   in sum(factor)
 in f(10)
 ";
               "let_rec_nested_func_2">::expect_int 50 "
-let f =
-  func mutiple factor ->
-    let rec sum = func n ->
+let f: (int, int -> int) =
+  func(mutiple:int, factor: int -> int) ->
+    let rec sum: (int -> int) = func(n:int -> int) ->
       if n = 0 then 0 else mutiple + sum(n - 1)
       in sum(factor)
   in
@@ -189,14 +217,14 @@ let f =
 ";
 
               "let_rec_factorial">::expect_int 40320 "
-let rec fact = func n ->
+let rec fact: (int -> int) = func(n:int -> int) ->
   if n = 0 then 1 else n * fact(n - 1)
 in fact(8)
 ";
 
               "let_rec_fib">::expect_int 34 "
-let rec fib =
-  func n ->
+let rec fib: (int -> int) =
+  func(n:int -> int) ->
     if n <= 1 then 1
     else fib(n - 1) + fib(n - 2)
   in
@@ -205,48 +233,21 @@ let rec fib =
 
               (* let rec ... and *)
               "let_rec_and_1">::expect_int 4 "
-let rec f1 = func n -> f2(n + 1)
-and f2 = func n -> n * 2
+let rec f1: (int -> int) = func(n:int -> int) -> f2(n + 1)
+and f2: (int -> int) = func (n:int -> int) -> n * 2
 in f1(1) ";
 
               (* https://en.wikipedia.org/wiki/Hofstadter_sequence#Hofstadter_Female_and_Male_sequences *)
               "let_rec_and_hofstadter">::expect_int 12 "
-let rec f = func n ->
+let rec f: (int -> int) = func(n:int -> int) ->
   if n = 0 then 1
   else n - m(f(n - 1))
-and m = func n ->
+and m: (int -> int) = func(n: int -> int) ->
   if n = 0 then 0
   else n - f(m(n - 1))
 in m(20)
 ";
-              (* func *)
-              "func_zero_arg">::expect_int 11 "(func -> 11)()";
-              "func_single_arg">::expect_int 1 "(func x -> x)(1)";
-              "func_two_args_1">::expect_int 1 "(func x y -> x)(1, 2)";
-              "func_two_args_2">::expect_int 2 "(func x y -> y)(1, 2)";
-              "func_three_args_1">::expect_int 1 "(func x y z -> x)(1, 2, 3)";
-              "func_three_args_2">::expect_int 2 "(func x y z -> y)(1, 2, 3)";
-              "func_three_args_3">::expect_int 3 "(func x y z -> z)(1, 2, 3)";
-              "func_with_exp_1">::expect_int 22 "(func f -> f + 1)(21)";
-              "func_with_exp_2">::expect_int 32 "(func x y -> x + y)(10 ,22)";
-              "func_with_exp_3">::expect_int 13 "(func x y z -> x + y * z)(3, 2, 5)";
-              "func_dup_arg_names">::expect_int 3 "(func x x -> x)(3, 2)";
-              "func_as_arg">::expect_int 22 "(func f -> f(21))(func x -> x + 1)";
-              "func_returned">::expect_int 22 "(func x -> func y -> x + y)(10)(12)";
-              "func_in_let">::expect_int 22 "let f = func x -> func y -> x + y in f(10)(12)";
-
-              (* func errors *)
-              "func_call_non_func">::expect_error 1 2 ERR_invoked_non_func "1(1)";
-              "func_call_wrong_num_args_0_1">::expect_error
-                1 12 (ERR_incorrect_arg_count(0, 1)) "(func -> 1)(1)";
-              "func_call_wrong_num_args_2_0">::expect_error
-                1 16 (ERR_incorrect_arg_count(2, 0)) "(func x y -> 1)()";
-              "func_call_wrong_num_args_2_3">::expect_error
-                1 16 (ERR_incorrect_arg_count(2, 3)) "(func x y -> 1)(1, 2, 3)";
-
-              (* the y-combinator, just because *)
-              (* TODO, here's an example: https://rosettacode.org/wiki/Y_combinator#OCaml *)
-            ]
+           ]
 
 
 let () = run_test_tt_main suite

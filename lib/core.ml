@@ -29,18 +29,18 @@ let apply_env env env_index var_index =
 
 (* Evaluates the parsed expression with the specified top-level environment. *)
 let eval e top_env : interp_result =
-  let rec inner_eval (e: expr_t) (env: env_t) : value_t =
+  let rec inner_eval (e: expr_node_t) (env: env_t) : value_t =
     match e.exp with
-    | EXPN_var id -> failwith ("Variable '" ^ id ^ "' still existed for some reason")
-    | EXPN_index (env_index, var_index) -> apply_env env env_index var_index
-    | EXPN_literal n -> n
-    | EXPN_logical(lop, left, right) ->
+    | EXP_var id -> failwith ("Variable '" ^ id ^ "' still existed for some reason")
+    | EXP_index (env_index, var_index, _) -> apply_env env env_index var_index
+    | EXP_literal n -> n
+    | EXP_logical(lop, left, right) ->
       begin
         let eval_bool expr = match inner_eval expr env with
           | VAL_bool b -> b
-          | _ -> raise (InterpExn(expr.loc, ERR_logical_operand_not_bool))
+          | _ -> raise (InterpExn(expr.loc, (ERR_internal("logical operand not bool"))))
         in
-        match lop with 
+        match lop with
         | LOP_and ->
           begin
             let lval = eval_bool left in
@@ -60,81 +60,81 @@ let eval e top_env : interp_result =
               VAL_bool(true)
           end
       end
-    | EXPN_binary(op, left, right) ->
+    | EXP_binary(op, left, right) ->
       let values = ((inner_eval left env), (inner_eval right env)) in
       let binary_int_op (func: int * int -> value_t) =
         begin
           match values with
           (* we have integers on both sides -- perform addition *)
-          | (VAL_i32 lval, VAL_i32 rval) -> func(lval, rval)
+          | (VAL_int lval, VAL_int rval) -> func(lval, rval)
           | _ ->
             (* we have a non-integer somewhere *)
-            raise (InterpExn(e.loc, ERR_arithmetic_on_non_number))
+            raise (InterpExn(e.loc, ERR_internal("arithmetic on non-number")))
         end in
       begin
         match op with
         | OP_eq ->
           begin
             match values with
-            | (VAL_i32 lval, VAL_i32 rval) -> VAL_bool(lval = rval)
+            | (VAL_int lval, VAL_int rval) -> VAL_bool(lval = rval)
             | (VAL_bool lval, VAL_bool rval) -> VAL_bool(lval = rval)
             | (_, _) -> VAL_bool(false)
           end
-        | OP_add  -> binary_int_op (fun (l, r) -> VAL_i32(l + r))
-        | OP_sub  -> binary_int_op (fun (l, r) -> VAL_i32(l - r))
-        | OP_mul  -> binary_int_op (fun (l, r) -> VAL_i32(l * r))
+        | OP_add  -> binary_int_op (fun (l, r) -> VAL_int(l + r))
+        | OP_sub  -> binary_int_op (fun (l, r) -> VAL_int(l - r))
+        | OP_mul  -> binary_int_op (fun (l, r) -> VAL_int(l * r))
         | OP_div  -> binary_int_op (fun (l, r) ->
-            if r = 0 then raise (InterpExn(e.loc, ERR_div_0)) else VAL_i32(l / r))
+            if r = 0 then raise (InterpExn(e.loc, ERR_div_0)) else VAL_int(l / r))
         | OP_mod  -> binary_int_op (fun (l, r) ->
-            if r = 0 then raise (InterpExn(e.loc, ERR_div_0)) else VAL_i32(l mod r))
+            if r = 0 then raise (InterpExn(e.loc, ERR_div_0)) else VAL_int(l mod r))
         | OP_gt   -> binary_int_op (fun (l, r) -> VAL_bool(l > r))
         | OP_gte  -> binary_int_op (fun (l, r) -> VAL_bool(l >= r))
         | OP_lt   -> binary_int_op (fun (l, r) -> VAL_bool(l < r))
         | OP_lte  -> binary_int_op (fun (l, r) -> VAL_bool(l <= r))
       end
-    | EXPN_if(cond_exp, then_exp, else_exp) ->
+    | EXP_if(cond_exp, then_exp, else_exp) ->
       let cond_val = inner_eval cond_exp env in
       begin
         match cond_val with
         | VAL_bool(true) -> inner_eval then_exp env
         | VAL_bool(false) -> inner_eval else_exp env
-        | _ -> raise (InterpExn(cond_exp.loc, ERR_if_cond_not_bool))
+        | _ -> raise (InterpExn(e.loc, (ERR_internal("if cond not bool"))))
       end
-    | EXPN_let(_, value_exp, body_exp ) ->
+    | EXP_let(var_def, body_exp ) ->
+        let (_, _, value_exp) = var_def in
         let the_value = inner_eval value_exp env in
         let nested_env = extend_env env [|the_value|] in
         inner_eval body_exp nested_env
-    | EXPN_let_rec(var_defs, body_exp) ->
-      let future_vals = Array.make (List.length var_defs) (VAL_i32(0)) in
+    | EXP_let_rec(var_defs, body_exp) ->
+      let future_vals = Array.make (List.length var_defs) (VAL_int(0)) in
       let nested_env = extend_env env future_vals in
         var_defs |> List.iteri
           (fun i vd ->
-             let (_, value_exp) = vd in
+             let (_, _, value_exp) = vd in
              let value = inner_eval value_exp nested_env in
              Array.set future_vals i value
-          ); 
+          );
         inner_eval body_exp nested_env
-    | EXPN_func(ids, body_exp) -> VAL_func((List.length ids), body_exp, env)
-    | EXPN_call(func_exp, arg_exps) ->
+    | EXP_func(ids, _, body_exp) -> VAL_func((List.length ids), body_exp, env)
+    | EXP_call(func_exp, arg_exps) ->
       let proc_val = inner_eval func_exp env in
       begin
         match proc_val with
         | VAL_func(expected_arg_count, body_exp, captured_env) ->
           let actual_arg_count = (List.length arg_exps) in
           if expected_arg_count <> actual_arg_count then
-            raise (InterpExn(
-                e.loc,
-                (ERR_incorrect_arg_count(expected_arg_count, actual_arg_count))))
+            raise (InterpExn(e.loc, ERR_internal("incorrect arg count")))
           else
             let arg_values = Array.of_list (List.map (fun e -> inner_eval e env) arg_exps)
             in
             let call_env = extend_env captured_env arg_values in
             inner_eval body_exp call_env
-        | _ -> raise (InterpExn(e.loc, ERR_invoked_non_func))
+        | _ -> raise (InterpExn(e.loc, (ERR_internal("invoked non func"))))
       end
   in
   try
     let resolved_exp = e |> Resolve.resolve_rewrite in
+    ignore (Check.type_of_exp resolved_exp);
     IR_success(inner_eval resolved_exp top_env)
   with InterpExn (loc, msg) ->
     IR_error(loc, msg)
@@ -152,7 +152,7 @@ let parse s =
   with LexicalExn(src_loc, msg) ->
     PR_error(src_loc, "Lexical error: " ^ msg)
      | Parser.Error ->
-       let sloc = Util.src_loc_of_position lexbuf.lex_curr_p in 
+       let sloc = Util.src_loc_of_position lexbuf.lex_curr_p in
        PR_error(sloc, "Syntax error near this position")
 
 

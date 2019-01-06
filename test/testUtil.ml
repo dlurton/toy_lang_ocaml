@@ -52,14 +52,7 @@ let expect_bool expected_result source =
   (fun _ ->
       let result = eval_bool source in
       assert_equal expected_result result ~printer:string_of_bool)
-
-(*
-let expect_type expected_type source =
-  (fun _ ->
-     let result = eval_type source in
-     assert_equal expected_type = result)
-*)
-
+      
 let expect_error expected_line_num expected_char_offset expected_error source =
   (fun _ -> let exp = test_parse source in
      let iresult = eval exp empty_env in

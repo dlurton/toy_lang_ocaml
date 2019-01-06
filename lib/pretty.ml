@@ -85,5 +85,29 @@ and pretty_string_of_var_def vd =
     (pretty_string_of_type ty)
     (pretty_string_of_expr value_exp)
 
+let string_of_error err =
+  match err with
+  | ERR_internal(msg) -> Printf.sprintf "internal error: %s" msg
+  | ERR_unbound_var id -> Printf.sprintf "unbound variable '%s'" id
+  | ERR_expected_bool actual_type ->
+    Printf.sprintf "Expected a bool value but a %s value was supplied"
+      (pretty_string_of_type actual_type)
+  | ERR_expected_int actual_type ->
+    Printf.sprintf "Expected an int value but a %s value was supplied"
+      (pretty_string_of_type actual_type)
+  | ERR_type_mismatch (ty1, ty2) ->
+    Printf.sprintf "Type mismatch %s and %s are not compatible in this context"
+      (pretty_string_of_type ty1)
+      (pretty_string_of_type ty2)
+  | ERR_if_branch_type_mismatch -> "Both branches of if expression must have the same type"
+  | ERR_cannot_call_non_func -> "Value is not a function"
+  | ERR_div_0 -> "divide by zero"
+  | ERR_incorrect_arg_count(expected, actual) ->
+    Printf.sprintf "function expected %d argument(s) but %d were supplied" expected actual
+  | ERR_arg_type_mismatch (arg_num, expected_ty, actual_ty) ->
+    Printf.sprintf "Argument %d expects %s but %s was supplied"
+      arg_num
+      (pretty_string_of_type expected_ty)
+      (pretty_string_of_type actual_ty)
 
 

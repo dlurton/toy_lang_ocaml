@@ -111,30 +111,6 @@ type error_t =
   | ERR_incorrect_arg_count of int * int
   | ERR_arg_type_mismatch of int * type_t * type_t
 
-let string_of_error err =
-  match err with
-  | ERR_internal(msg) -> Printf.sprintf "internal error: %s" msg
-  | ERR_unbound_var id -> Printf.sprintf "unbound variable '%s'" id
-  | ERR_expected_bool _ ->
-    (* TODO: include the actual type in this error message--currently can't because of dependency cycle *)
-    "Expected a bool value"
-  | ERR_expected_int _ ->
-    (* TODO: include the actual type in this error message--currently can't because of dependency cycle *)
-    "Expected an int value"
-  | ERR_type_mismatch (_, _) ->
-    (* TODO: include the actual types in this error message--currently can't because of dependency cycle *)
-    "Type mismatch"
-  | ERR_if_branch_type_mismatch -> "Both branches of if expression must have the same type"
-  | ERR_cannot_call_non_func -> "Value is not a function"
-  | ERR_div_0 -> "divide by zero"
-  | ERR_incorrect_arg_count(expected, actual) ->
-    Printf.sprintf "function expected %d argument(s) but %d were supplied" expected actual
-  | ERR_arg_type_mismatch (arg_num, _, _) ->
-    (* TODO: include the actual types in this error message--currently can't because of dependency cycle *)
-    (* TODO: include the actual types in this error message--currently can't because of dependency cycle *)
-    Printf.sprintf "Argument %d has an incorrect type" arg_num
-
-
 (* The result of an attempt to interpret an AST. *)
 type interp_result =
     IR_error of src_loc_t * error_t

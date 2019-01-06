@@ -13,6 +13,14 @@ how to determine the type of an expression:
    - let and let rec have the type of their body.
    - Function constructors have the type of their expressed return type
    - Function calls have the type of the function that they evaluate to.
+
+type checks:
+   - operands of operators +, -, /, %, >, >= <, <= must be int
+   - operands of operators || and && must bool
+   - values assigned in let and let rec must match the declared type
+   - Arguments to function calls must match the declared parameter types.
+   - The condition of the of the if statement must be a boolean value.
+   - Both branches of an if statement must have the same type.
 *)
 
 
@@ -122,17 +130,3 @@ and type_of_exp node : type_t =
         ret_type
       | _ -> raise (InterpExn(func_exp.loc, ERR_cannot_call_non_func))
     end
-
-
-
-(*
-type checks:
-   - operands of operators +, -, /, %, >, >= <, <= must be int
-   - operands of operators || and && must bool
-   - values assigned in let and let rec must match the declared type
-   - Arguments to function calls must match the declared parameter types.
-   - The condition of the of the if statement must be a boolean value.
-   - Both branches of an if statement must have the same type.
-*)
-
-(*let check_types exp*)

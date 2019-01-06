@@ -33,7 +33,7 @@ egregious situations.
   - Multi-line: `(* ... *)`
 - `if`/`then`/`else`
 - Variables (`let`)
-- Operators: `+`, `-`, `*`, `/`, `%`, `=`
+- Operators: `+`, `-`, `*`, `/`, `%`, `=`, `>`, `>=`, `<`, `<=`, `&&`, `||`
 - Functions & closures
 - Recursion (`let rec`)
 - A REPL

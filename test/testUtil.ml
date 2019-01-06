@@ -35,13 +35,8 @@ let value_to_bool = function
    | VAL_bool b -> b
    | _ -> assert_failure "Result of the function was not a bool"
 
-let value_to_type = function
-  | VAL_type t -> t
-   | _ -> assert_failure "Result of the function was not a type"
-
 let eval_int src = value_to_int (test_eval src)
 let eval_bool src = value_to_bool (test_eval src)
-let eval_type src = value_to_type (test_eval src)
 
 let expect_int expected_result source =
   (fun _ ->

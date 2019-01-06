@@ -32,7 +32,6 @@ let rec type_of_value v : type_t =
     (* should the function type be included in the function value
        instead of having to interrogate body_node? *)
   | VAL_func (_, body_node, _) -> type_of_exp body_node
-  | VAL_type _ -> failwith "TODO: remove VAL_type"
 
 (* Given an expr_node_t, recursively perform type checks of its children
    and then return its type_t. *)

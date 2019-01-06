@@ -47,8 +47,6 @@ and value_t =
   | VAL_int of int
   (* argument count * function body * captured environment *)
   | VAL_func of int * expr_node_t * env_t
-  (* TODO:  remove VAL_TYPE *)
-  | VAL_type of type_t
 
 (* An environment is, for now, simply a list of value_t *)
 and env_t = value_t array list

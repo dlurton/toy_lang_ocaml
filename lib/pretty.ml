@@ -70,7 +70,6 @@ and pretty_string_of_value = function
     sprintf "func_value (%d args) -> %s"
       arg_count
       (pretty_string_of_expr body_exp)
-  | VAL_type t -> pretty_string_of_type t
 and pretty_string_of_type = function
   | TY_int -> "int"
   | TY_bool -> "bool"

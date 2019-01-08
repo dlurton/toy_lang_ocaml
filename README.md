@@ -100,13 +100,7 @@ OCAML toy language REPL - type "exit" to exit
 ### Working With Menhir 
 
 If after modifying `parser.mly` a message appears about shift/reduce conflicts, it can be hard to diagnose
-what's going on.  To get `menhir` to tell you about the shift/reduce conflicts, execute:
-
-```
-menhir --explain lib/parser.mly
-``
-
-Then, you can examine the file `lib/parser.conflicts` to read about the first shift/reduce conflict detected.
+what's going on.  To get `menhir` to tell you about the shift/reduce conflicts execute: `menhir --explain lib/parser.mly`. Then you can examine the file `lib/parser.conflicts` to read about the first shift/reduce conflict detected.
 
 ### Helpful links
 

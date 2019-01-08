@@ -32,11 +32,6 @@ It looked something like: `%token LET "let"`
 %left GT GTE LT LTE
 %left EQUALS
 %left ADD SUB
-(*
-  TODO: verify that MUL, DIV & MOD operators below should have left associativity,
-  which seems correct to me but I read somewhere recently that they should
-  have right associativity instead.
-*)
 %left MUL DIV MOD
 %nonassoc LPAREN
 

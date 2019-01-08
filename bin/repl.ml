@@ -58,7 +58,8 @@ let () =
   (* LNoise.set_multiline true; *)
   LNoise.history_load ~filename:history_file |> ignore;
   LNoise.history_set ~max_length:1000 |> ignore;
-  (* TODO: LNoise.set_completion_callback *)
+  (* Linenoise has a completion callback that we can use if we ever feel like
+      supporting autocompletion: LNoise.set_completion_callback *)
   print_endline("OCaml toy language REPL - type \"exit\" to exit");
   (fun source_line ->
      if source_line = "exit" then exit 0;

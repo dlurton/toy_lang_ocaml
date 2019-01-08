@@ -36,21 +36,17 @@ let rec type_of_value v : type_t =
 (* Given an expr_node_t, recursively perform type checks of its children
    and then return its type_t. *)
 and type_of_exp node : type_t =
+  let check_type node expected_ty incorrect_ty : unit =
+    let actual_ty = type_of_exp node in
+    if actual_ty <> expected_ty then incorrect_ty actual_ty
+  in
   let check_is_bool node =
-    begin
-      let actual_t = type_of_exp node in
-      match actual_t with
-      | TY_bool -> () (* do nothing, it's ok *)
-      | _ -> raise (InterpExn(node.loc, ERR_expected_bool(actual_t)))
-    end in
-(* TODO: DRY *)
+    check_type node TY_bool
+      (fun actual_ty -> raise (InterpExn(node.loc, ERR_expected_bool(actual_ty))))
+  in
   let check_is_int node =
-    begin
-      let actual_t = type_of_exp node in
-      match actual_t with
-      | TY_int -> () (* do nothing, it's ok *)
-      | _ -> raise (InterpExn(node.loc, ERR_expected_int(actual_t)))
-    end
+    check_type node TY_int
+      (fun actual_ty -> raise (InterpExn(node.loc, ERR_expected_int(actual_ty))))
   in
   let check_types_equal n1 n2 blame_loc =
     let ty1 = type_of_exp n1 in
@@ -87,7 +83,6 @@ and type_of_exp node : type_t =
         TY_bool
       | OP_eq ->
         check_types_equal l_node r_node node.loc;
-        (* TODO: Do we care about function equality? What does that even mean? *)
         TY_bool
     end
   | EXP_if(cond_exp, then_exp, else_exp) ->

@@ -89,9 +89,8 @@ and var_def_t = string * type_t * expr_node_t
 (* parameter name * parameter type *)
 and param_def_t = string * type_t
 
-(* TODO: parse_result and interp_result really should have the _t suffix. *)
 (* The result of an attempt to parse a snippet of code. *)
-type parse_result =
+type parse_result_t =
     PR_error of src_loc_t * string
   | PR_success of expr_node_t
 
@@ -110,7 +109,7 @@ type error_t =
   | ERR_arg_type_mismatch of int * type_t * type_t
 
 (* The result of an attempt to interpret an AST. *)
-type interp_result =
+type interp_result_t =
     IR_error of src_loc_t * error_t
   | IR_success of value_t
 

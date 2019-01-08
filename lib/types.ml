@@ -35,6 +35,7 @@ type logical_op_t =
   | LOP_or (* logical or *)
 
 type type_t =
+  | TY_unknown
   | TY_int
   | TY_bool
   | TY_func of func_type_t

@@ -84,10 +84,10 @@ start the REPL:
 
 ```
 ? dune exec bin/repl.exe
-OCAML toy language REPL - type "?exit" to exit
+OCAML toy language REPL - type "exit" to exit
 > let foo = func x -> x(1) in foo(func y -> y + 1)
 2
-> ?exit
+> exit
 ```
 
 ## TODO

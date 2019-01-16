@@ -1,73 +1,96 @@
 open Types
 
-type ('cx) custom_rewriter_t = expr_node_t -> 'cx -> expr_node_t option
+(**
+   Most AST transformations are only focused on a different expr_node_variants.
+   Those notes which are not specially modified during an AST transform are
+   usually a deep clone.  The way I favor for accmoplishing this is to pattern
+   match over the expr_node_t variant.  However, it would be a huge waste of
+   bytes to copy & paste a huge match expression and modify it minimally for
+   the purposes of a specific rewrite.
 
-(*
-   Rewrites an expression.
-
-   custom_rewrite is invoked and if None is returned, then applies a
-   default cloning rewrite to the node.
-
-   rewrite context is any "context" that is neede for the custom rewrite,
-   such as a static environment.
-
+   This class is an attempt to mitigate that.  It provides a default rewriter
+   which deeply clones the expr_node_t which is passed to the rewrite method,
+   however before each node is cloned custom_rewrite is called to see if
+   the derived class can apply a specific rewrite to the node.  If
+   custom_rewrite returns null then the default deep clone is performed
+   instead.
 *)
-let rewrite expr_node (rewrite_context: 'cx) (custom_rewrite: 'cx custom_rewriter_t) =
-  let rec inner_rewrite e ctx =
-    match custom_rewrite e ctx with
-        | Some (new_e) -> new_e
-        | None -> {
-            loc = e.loc;
-            exp =
-              match e.exp with
-              | EXP_var id -> EXP_var(id)
-              | EXP_index (env_index, var_index, var_type) ->
-                EXP_index(env_index, var_index, var_type)
-              | EXP_literal n -> EXP_literal(n)
-              | EXP_logical(lop, left, right) -> EXP_logical(
-                  lop,
-                  (inner_rewrite left ctx),
-                  (inner_rewrite right ctx)
-                )
-              | EXP_binary(op, left, right) -> EXP_binary(
-                  op,
-                  (inner_rewrite left ctx),
-                  (inner_rewrite right ctx)
-                )
-              | EXP_if(cond_exp, then_exp, else_exp) -> EXP_if(
-                  (inner_rewrite cond_exp ctx),
-                  (inner_rewrite then_exp ctx),
-                  (inner_rewrite else_exp ctx)
-                )
-              | EXP_let(vd, body_exp) ->
-                let (id, ty, value_exp) = vd in
-                EXP_let(
-                  (id, ty, (inner_rewrite value_exp ctx)),
-                  (inner_rewrite body_exp ctx)
-                )
-              | EXP_let_rec(var_defs, body_exp ) ->
-                let new_var_defs =
-                  var_defs |> List.map
-                    (fun vd -> let (id, ty, value_exp) = vd in
-                      (id, ty, (inner_rewrite value_exp) ctx))
-                in
-                EXP_let_rec(
-                  new_var_defs,
-                  (inner_rewrite body_exp ctx)
-                )
-              | EXP_func(arg_defs, ret_type, body_exp) -> EXP_func(
-                  arg_defs,
-                  ret_type,
-                  (inner_rewrite body_exp ctx)
-                )
-              | EXP_call(func_exp, arg_exps) -> EXP_call(
-                  (inner_rewrite func_exp ctx),
-                  arg_exps |> List.map (fun e -> inner_rewrite e ctx)
-                )
-          }
-  in
-  inner_rewrite expr_node rewrite_context
+class virtual ['ctx] expr_node_transform = object(self)
+  method private virtual default_ctx: 'ctx
+
+  (** Overriding methods may return Some to rewrite the specified node, or
+      None to indicate that the default deep clone should be applied. *)
+  method private custom_rewrite (_: expr_node_t) (_: 'ctx) : expr_node_t option = None
+
+  (**
+     Applies the custom rewrite or deeply clones the specified expr_node_t.
+  *)
+  method ctx_rewrite (e: expr_node_t) (ctx: 'ctx) =
+    (* try the custom rewrite *)
+    match self#custom_rewrite e ctx with
+    | Some (new_e) -> new_e
+    | None -> {
+        loc = e.loc;
+        exp =
+          (* apply the default clone *)
+          match e.exp with
+          | EXP_var id -> EXP_var(id)
+          | EXP_index (env_index, var_index, var_type) ->
+            EXP_index(env_index, var_index, var_type)
+          | EXP_literal n -> EXP_literal(n)
+          | EXP_logical(lop, left, right) -> EXP_logical(
+              lop,
+              (self#ctx_rewrite left ctx),
+              (self#ctx_rewrite right ctx)
+            )
+          | EXP_binary(op, left, right) -> EXP_binary(
+              op,
+              (self#ctx_rewrite left ctx),
+              (self#ctx_rewrite right ctx)
+            )
+          | EXP_if(cond_exp, then_exp, else_exp) -> EXP_if(
+              (self#ctx_rewrite cond_exp ctx),
+              (self#ctx_rewrite then_exp ctx),
+              (self#ctx_rewrite else_exp ctx)
+            )
+          | EXP_let(vd, body_exp) ->
+            let (id, ty, value_exp) = vd in
+            EXP_let(
+              (id, ty, (self#ctx_rewrite value_exp ctx)),
+              (self#ctx_rewrite body_exp ctx)
+            )
+          | EXP_let_rec(var_defs, body_exp ) ->
+            let new_var_defs =
+              var_defs |> List.map
+                (fun vd -> let (id, ty, value_exp) = vd in
+                  (id, ty, (self#ctx_rewrite value_exp) ctx))
+            in
+            EXP_let_rec(
+              new_var_defs,
+              (self#ctx_rewrite body_exp ctx)
+            )
+          | EXP_func(arg_defs, ret_type, body_exp) -> EXP_func(
+              arg_defs,
+              ret_type,
+              (self#ctx_rewrite body_exp ctx)
+            )
+          | EXP_call(func_exp, arg_exps) -> EXP_call(
+              (self#ctx_rewrite func_exp ctx),
+              arg_exps |> List.map (fun e -> self#ctx_rewrite e ctx)
+            )
+      }
+
+  method rewrite expr_node =
+    self#ctx_rewrite expr_node self#default_ctx
+
+end
+
+class default_transform = object
+  inherit [unit] expr_node_transform
+  method private default_ctx = ()
+end
 
 let default_rewrite e =
-  rewrite e () (fun _ _ -> None)
+  let xform = new default_transform in
+  xform#rewrite e
 

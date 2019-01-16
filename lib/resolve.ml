@@ -31,8 +31,66 @@ let senv_lookup id top_senv =
   in
   search_senv top_senv 0
 
+class resolve_transform = object(self)
+  inherit [senv_t] expr_node_transform
+  method private default_ctx = empty_senv
 
-let resolve_rewrite (node: expr_node_t) =
+  method! custom_rewrite e senv =
+    let new_e = match e.exp with
+      (* let evaluates value_exp, then extends the environment
+         with the result, and executes body_exp under this
+         extended environment *)
+      | EXP_let(vd, body_exp) ->
+        let (id, ty, value_exp) = vd in
+        let let_senv = extend_senv [(id, ty)] senv in
+        Some(EXP_let(
+          (id, ty, (self#ctx_rewrite value_exp senv)),
+          (self#ctx_rewrite body_exp let_senv)
+        ))
+      (* let rec is similar to let, but executes both value_exp
+         and body_exp in the extended environment so that
+         value_exp has access to the variable being defined.
+         let rec also supports multiple variable definitions. *)
+      | EXP_let_rec(var_defs, body_exp) ->
+        let ids = var_defs |> List.map (fun vd -> let (id, ty, _) = vd in (id, ty)) in
+        let let_senv = extend_senv ids senv in
+        let new_var_defs =
+          var_defs |> List.map
+            (fun vd ->
+               let (id, ty, value_exp) = vd in
+               (id, ty, (self#ctx_rewrite value_exp let_senv)))
+        in
+        Some(EXP_let_rec(
+            new_var_defs,
+            (self#ctx_rewrite body_exp let_senv)
+          ))
+      | EXP_func(arg_defs, ret_type, body_exp) ->
+        let ids = arg_defs |> List.map (fun vd -> let (id, ty) = vd in (id, ty)) in
+        let arg_senv = extend_senv ids senv in
+        Some(EXP_func(
+            arg_defs,
+            ret_type,
+            (self#ctx_rewrite body_exp arg_senv)))
+      | EXP_index _ -> failwith "This AST already has at least one index."
+      | EXP_var id ->
+        begin
+          match senv_lookup id senv with
+          | None -> raise (InterpExn(e.loc, ERR_unbound_var(id)))
+          | Some (e_index, v_index, v_ty) -> Some(EXP_index(e_index, v_index, v_ty))
+        end
+      | _ -> None
+    in
+    match new_e with
+    | None -> None
+    | Some new_node -> Some({ e with exp = new_node })
+
+end
+
+let resolve_rewrite e =
+  let xform = new resolve_transform in
+  xform#rewrite e
+
+(*let resolve_rewrite (node: expr_node_t) =
   let rec inner_resolve_rewrite e senv =
     let new_e = match e.exp with
       (* let evaluates value_exp, then extends the environment
@@ -83,3 +141,4 @@ let resolve_rewrite (node: expr_node_t) =
     | Some new_node -> Some({ node with exp = new_node })
   in
   rewrite node empty_senv inner_resolve_rewrite
+*)

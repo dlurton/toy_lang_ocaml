@@ -1,12 +1,12 @@
 open Types
 
 (**
-   Most AST transformations are only focused on a different expr_node_variants.
-   Those notes which are not specially modified during an AST transform are
-   usually a deep clone.  The way I favor for accmoplishing this is to pattern
-   match over the expr_node_t variant.  However, it would be a huge waste of
-   bytes to copy & paste a huge match expression and modify it minimally for
-   the purposes of a specific rewrite.
+   Most AST transformations are only focused on a a subset of expr_node_t
+   variants.Those notes which are not specially modified during an AST
+   transform are usually a deep clone.  The way I favor for accmoplishing a
+   deep clone is to pattern match over the expr_node_t variant.  However, it
+   would be a huge waste of bytes to copy & paste a huge match expression and
+   modify it minimally for the purposes of a specific rewrite.
 
    This class is an attempt to mitigate that.  It provides a default rewriter
    which deeply clones the expr_node_t which is passed to the rewrite method,
@@ -14,13 +14,19 @@ open Types
    the derived class can apply a specific rewrite to the node.  If
    custom_rewrite returns null then the default deep clone is performed
    instead.
+
+   The derived class should call back into ctx_rewrite to rewrite its children
+   nodes or apply the default deep clone as needed.
 *)
 class virtual ['ctx] expr_node_transform = object(self)
   method private virtual default_ctx: 'ctx
 
   (** Overriding methods may return Some to rewrite the specified node, or
       None to indicate that the default deep clone should be applied. *)
-  method private custom_rewrite (_: expr_node_t) (_: 'ctx) : expr_node_t option = None
+  method private custom_rewrite
+      (_: expr_node_t)
+      (_: 'ctx)
+    : expr_node_t option = None
 
   (**
      Applies the custom rewrite or deeply clones the specified expr_node_t.

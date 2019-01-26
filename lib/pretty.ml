@@ -71,7 +71,7 @@ and pretty_string_of_value = function
       arg_count
       (pretty_string_of_expr body_exp)
 and pretty_string_of_type = function
-  | TY_unknown -> "?"
+  | TY_var(index) -> sprintf "?(%d)" index
   | TY_int -> "int"
   | TY_bool -> "bool"
   | TY_func (arg_types, ret_type) ->

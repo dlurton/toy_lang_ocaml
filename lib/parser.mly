@@ -1,10 +1,17 @@
 %{
 open Types
 open Util
+
+
+(** Increments a counter by one and returns its value *)
+let next_ty_var_index =
+  let ty_counter = ref 0 in
+  fun () -> ty_counter := !ty_counter + 1; !ty_counter
+
 let none_to_unknown (ty_option: type_t option): type_t =
   match ty_option with
   | Some(ty) -> ty
-  | None -> TY_unknown
+  | None -> TY_var(next_ty_var_index ())
 
 %}
 
